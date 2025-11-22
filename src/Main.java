@@ -30,5 +30,10 @@ public class Main {
 
         Subtask subtask3 = new Subtask("Подзадача 3", "Подзадача Эпика 2", Status.NEW, epic2.getId());
         manager.createSubtask(subtask3);
+
+        // Печать списков Эпиков, Задач и Подзадач
+        System.out.println("Эпики: " + manager.getEpics());
+        System.out.println("Задачи: " + manager.getTasks());
+        System.out.println("Подзадачи: " + manager.getSubtasks());
     }
 }
