@@ -54,4 +54,17 @@ public class TaskManager {
             epic.setStatus(Status.NEW);
         }
     }
+
+    // Получение по идентификатору для каждого из типов задач(Задача/Эпик/Подзадача)
+    public Task getTask(int id) {
+        return tasks.get(id);
+    }
+
+    public Epic getEpic(int id) {
+        return epics.get(id);
+    }
+
+    public Subtask getSubtask(int id) {
+        return subtasks.get(id);
+    }
 }
