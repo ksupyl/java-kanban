@@ -155,4 +155,31 @@ public class TaskManager {
             }
         }
     }
+
+    // Удаление по идентификатору для каждого из типов задач(Задача/Эпик/Подзадача)
+    public void deleteTask(int id) {
+        tasks.remove(id);
+    }
+
+    public void deleteEpic(int id) {
+        Epic epic = epics.remove(id);
+        if (epic != null) {
+            // Удаление подзадач, связанных с этим Эпиком
+            for (Integer subtaskId : epic.getSubtaskIds()) {
+                subtasks.remove(subtaskId);
+            }
+        }
+    }
+
+    public void deleteSubtask(int id) {
+        Subtask subtask = subtasks.remove(id);
+        if (subtask != null) {
+            // Удаление ID Подзадачи из Эпика
+            Epic epic = epics.get(subtask.getEpicId());
+            if (epic != null) {
+                epic.removeSubtaskId(id);
+                updateEpicStatus(epic);
+            }
+        }
+    }
 }

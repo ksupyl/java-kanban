@@ -28,4 +28,9 @@ public class Epic extends Task {
     public void addSubtaskId(int subtaskId) {
         subtaskIds.add(subtaskId);
     }
+
+    // Удаление определенного ID подзадач
+    public void removeSubtaskId(Integer subtaskId) {
+        subtaskIds.remove(subtaskId);
+    }
 }
