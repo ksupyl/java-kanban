@@ -23,4 +23,9 @@ public class Epic extends Task {
     public void cleanSubtaskIds() {
         subtaskIds.clear();
     }
+
+    // Добавление ID подзадач
+    public void addSubtaskId(int subtaskId) {
+        subtaskIds.add(subtaskId);
+    }
 }

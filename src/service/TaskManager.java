@@ -67,4 +67,33 @@ public class TaskManager {
     public Subtask getSubtask(int id) {
         return subtasks.get(id);
     }
+
+    // Создание для каждого из типов задач(Задача/Эпик/Подзадача)
+    public Task createTask(Task task) {
+        task.setId(getNextId());
+        task.setStatus(Status.NEW);
+        tasks.put(task.getId(), task);
+        return task;
+    }
+
+    public Epic createEpic(Epic epic) {
+        epic.setId(getNextId());
+        epic.setStatus(Status.NEW);
+        epics.put(epic.getId(), epic);
+        return epic;
+    }
+
+    public Subtask createSubtask(Subtask subtask) {
+        subtask.setId(getNextId());
+        subtask.setStatus(Status.NEW);
+        subtasks.put(subtask.getId(), subtask);
+
+        // Добавляем в Эпик ID новой Подзадачи
+        Epic epic = epics.get(subtask.getEpicId());
+        if (epic != null) {
+            epic.addSubtaskId(subtask.getId());
+        }
+
+        return subtask;
+    }
 }
