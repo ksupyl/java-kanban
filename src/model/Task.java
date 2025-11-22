@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Objects;
+
 public class Task {
     private String name;
     private String description;
@@ -46,4 +48,17 @@ public class Task {
         this.status = status;
     }
 
+    // Переопределение методов equals и hashCode для ID
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Task task = (Task) obj;
+        return id == task.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }
