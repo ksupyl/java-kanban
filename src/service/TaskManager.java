@@ -35,4 +35,23 @@ public class TaskManager {
     public ArrayList<Subtask> getSubtasks() {
         return new ArrayList<>(subtasks.values());
     }
+
+    // Удаление всех задач для каждого из типов задач(Задача/Эпик/Подзадача)
+    public void clearTasks() {
+        tasks.clear();
+    }
+
+    public void clearEpics() {
+        epics.clear();
+        subtasks.clear();
+    }
+
+    public void clearSubtasks() {
+        subtasks.clear();
+        // Чистка Эпиков, если подзадач больше нет
+        for (Epic epic : epics.values()) {
+            epic.cleanSubtaskIds();
+            epic.setStatus(Status.NEW);
+        }
+    }
 }
