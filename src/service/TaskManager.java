@@ -96,4 +96,63 @@ public class TaskManager {
 
         return subtask;
     }
+
+    // Обновление задач для каждого из типов задач(Задача/Эпик/Подзадача)
+    public void updateTask(Task task) {
+        // Проверка на наличие задачи
+        if (tasks.containsKey(task.getId())) {
+            tasks.put(task.getId(), task);
+        }
+    }
+
+    public void updateEpic(Epic epic) {
+        if (epics.containsKey(epic.getId())) {
+            // Создание копии списка задач во избежание потери данных при обновлении
+            Epic oldEpic = epics.get(epic.getId());
+            epic.setSubtaskIds(oldEpic.getSubtaskIds());
+            epic.setStatus(oldEpic.getStatus());
+
+            epics.put(epic.getId(), epic);
+        }
+    }
+
+    // Метод для обновления статуса Эпик при обновлении Подзадач
+    private void updateEpicStatus(Epic epic) {
+        if (epic.getSubtaskIds().isEmpty()) {
+            epic.setStatus(Status.NEW);
+            return;
+        }
+
+        int countNew = 0;
+        int countDone = 0;
+
+        for (int subtaskId : epic.getSubtaskIds()) {
+            Subtask subtask = subtasks.get(subtaskId);
+            if (subtask.getStatus() == Status.NEW) {
+                countNew++;
+            } else if (subtask.getStatus() == Status.DONE) {
+                countDone++;
+            }
+        }
+
+        if (countNew == epic.getSubtaskIds().size()) {
+            epic.setStatus(Status.NEW);
+        } else if (countDone == epic.getSubtaskIds().size()) {
+            epic.setStatus(Status.DONE);
+        } else {
+            epic.setStatus(Status.IN_PROGRESS);
+        }
+    }
+
+    public void updateSubtask(Subtask subtask) {
+        if (subtasks.containsKey(subtask.getId())) {
+            subtasks.put(subtask.getId(), subtask);
+
+            // Пересчёт статуса Эпик после обновления Подзадач
+            Epic epic = epics.get(subtask.getEpicId());
+            if (epic != null) {
+                updateEpicStatus(epic);
+            }
+        }
+    }
 }
