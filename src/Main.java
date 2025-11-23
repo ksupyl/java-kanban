@@ -76,5 +76,15 @@ public class Main {
         System.out.println("Эпик 2: одна Подзадача и она сделана");
         System.out.println("Статус Эпика 2: " + manager.getEpic(epic2.getId()).getStatus());
 
+        // Разделительная строка
+        manager.stringDelimiter();
+
+        // Удаление задачи и эпика
+        manager.deleteTask(task1.getId());
+        manager.deleteEpic(epic1.getId());
+
+        System.out.println("Список Задач после удаления: " + manager.getTasks());
+        System.out.println("Список Эпиков после удаления: " + manager.getEpics());
+        System.out.println("Список Подзадач после удаления: " + manager.getSubtasks());
     }
 }
