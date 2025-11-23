@@ -1,13 +1,12 @@
 package service;
 
-// Импорт классов из пакета model
-import model.Status; // перечисляемый тип enum Status
-import model.Task; // класс Task
-import model.Subtask; // класс Subtask
-import model.Epic; // класс Epic
+import model.Status;
+import model.Task;
+import model.Subtask;
+import model.Epic;
 
-import java.util.ArrayList; // импорт списка
-import java.util.HashMap; // импорт хеш-таблиц
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class TaskManager {
     // Хеш-таблицы для хранения задач для классов Task, Epic, Subtask
@@ -21,12 +20,6 @@ public class TaskManager {
     // Метод для увеличения ID
     private int getNextId() {
         return nextId++;
-    }
-
-    // Метод для разделительной строки
-    public final void stringDelimiter(){
-        System.out.println();
-        System.out.println("-".repeat(30));
     }
 
     // Получение списка всех задач для каждого из типов задач(Задача/Эпик/Подзадача)
@@ -56,7 +49,7 @@ public class TaskManager {
         subtasks.clear();
         // Чистка Эпиков, если подзадач больше нет
         for (Epic epic : epics.values()) {
-            epic.cleanSubtaskIds();
+            epic.clearSubtaskIds();
             epic.setStatus(Status.NEW);
         }
     }

@@ -8,14 +8,12 @@ public class Task {
     private String description;
     private Status status;
 
-    // Конструктор
     public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
         this.status = status;
     }
 
-    // Геттеры и сеттеры
     public int getId() {
         return id;
     }
@@ -59,7 +57,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(id);
     }
 
     @Override

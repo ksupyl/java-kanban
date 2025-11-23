@@ -6,6 +6,12 @@ import service.TaskManager;
 
 public class Main {
 
+    // Метод для разделительной строки
+    private static void printDelimiter(){
+        System.out.println();
+        System.out.println("-".repeat(30));
+    }
+
     public static void main(String[] args) {
         TaskManager manager = new TaskManager();
 
@@ -39,7 +45,7 @@ public class Main {
         System.out.println("Подзадачи: " + manager.getSubtasks());
 
         // Разделительная строка
-        manager.stringDelimiter();
+        printDelimiter();
 
         // Изменение статуса Задачи 2
         task2.setStatus(Status.IN_PROGRESS);
@@ -48,7 +54,7 @@ public class Main {
         System.out.println("Статус задачи 2: " + manager.getTask(task2.getId()).getStatus());
 
         // Разделительная строка
-        manager.stringDelimiter();
+        printDelimiter();
 
         // Изменение статуса Подзадач в Эпике 1
         subtask1.setStatus(Status.DONE);
@@ -59,7 +65,7 @@ public class Main {
         System.out.println("Статус Эпика 1: " + manager.getEpic(epic1.getId()).getStatus());
 
         // Разделительная строка
-        manager.stringDelimiter();
+        printDelimiter();
 
         // Продолжение изменения статуса Подзадач в Эпике 1
         subtask2.setStatus(Status.DONE);
@@ -68,7 +74,7 @@ public class Main {
         System.out.println("Статус Эпика 1: " + manager.getEpic(epic1.getId()).getStatus());
 
         // Разделительная строка
-        manager.stringDelimiter();
+        printDelimiter();
 
         // Изменение статуса Подзадач в Эпике 2
         subtask3.setStatus(Status.DONE);
@@ -77,7 +83,7 @@ public class Main {
         System.out.println("Статус Эпика 2: " + manager.getEpic(epic2.getId()).getStatus());
 
         // Разделительная строка
-        manager.stringDelimiter();
+        printDelimiter();
 
         // Удаление задачи и эпика
         manager.deleteTask(task1.getId());
