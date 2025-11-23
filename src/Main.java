@@ -28,12 +28,53 @@ public class Main {
         Epic epic2 = new Epic("Эпик 2", "Эпик с 1 подзадачей");
         manager.createEpic(epic2);
 
-        Subtask subtask3 = new Subtask("Подзадача 3", "Подзадача Эпика 2", Status.NEW, epic2.getId());
+        Subtask subtask3 = new Subtask("Подзадача 1", "Подзадача Эпика 2", Status.NEW, epic2.getId());
         manager.createSubtask(subtask3);
 
         // Печать списков Эпиков, Задач и Подзадач
-        System.out.println("Эпики: " + manager.getEpics());
         System.out.println("Задачи: " + manager.getTasks());
+        System.out.println();
+        System.out.println("Эпики: " + manager.getEpics());
+        System.out.println();
         System.out.println("Подзадачи: " + manager.getSubtasks());
+
+        // Разделительная строка
+        manager.stringDelimiter();
+
+        // Изменение статуса Задачи 2
+        task2.setStatus(Status.IN_PROGRESS);
+        manager.updateTask(task2);
+        System.out.println("Задача 2: в процессе");
+        System.out.println("Статус задачи 2: " + manager.getTask(task2.getId()).getStatus());
+
+        // Разделительная строка
+        manager.stringDelimiter();
+
+        // Изменение статуса Подзадач в Эпике 1
+        subtask1.setStatus(Status.DONE);
+        subtask2.setStatus(Status.IN_PROGRESS);
+        manager.updateSubtask(subtask1);
+        manager.updateSubtask(subtask2);
+        System.out.println("Эпик 1: одна из Подзадач сделана и одна в процессе");
+        System.out.println("Статус Эпика 1: " + manager.getEpic(epic1.getId()).getStatus());
+
+        // Разделительная строка
+        manager.stringDelimiter();
+
+        // Продолжение изменения статуса Подзадач в Эпике 1
+        subtask2.setStatus(Status.DONE);
+        manager.updateSubtask(subtask2);
+        System.out.println("Эпик 1: обе Подзадачи сделаны");
+        System.out.println("Статус Эпика 1: " + manager.getEpic(epic1.getId()).getStatus());
+
+        // Разделительная строка
+        manager.stringDelimiter();
+
+        // Изменение статуса Подзадач в Эпике 2
+        subtask3.setStatus(Status.DONE);
+        manager.updateSubtask(subtask3);
+        System.out.println("Эпик 2: одна Подзадача и она сделана");
+        System.out.println("Статус Эпика 2: " + manager.getEpic(epic2.getId()).getStatus());
+
     }
 }

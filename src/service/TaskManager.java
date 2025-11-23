@@ -23,6 +23,12 @@ public class TaskManager {
         return nextId++;
     }
 
+    // Метод для разделительной строки
+    public final void stringDelimiter(){
+        System.out.println();
+        System.out.println("-".repeat(30));
+    }
+
     // Получение списка всех задач для каждого из типов задач(Задача/Эпик/Подзадача)
     public ArrayList<Task> getTasks() {
         return new ArrayList<>(tasks.values());
