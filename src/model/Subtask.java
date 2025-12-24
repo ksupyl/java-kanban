@@ -13,7 +13,18 @@ public class Subtask extends Task {
     }
 
     public void setEpicId(int epicId) {
+        if (epicId == this.getId()) {
+            return;
+        }
         this.epicId = epicId;
+    }
+
+    @Override
+    public void setId(int id) {
+        if (id == this.getEpicId()) {
+            return;
+        }
+        super.setId(id);
     }
 
     @Override

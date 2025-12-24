@@ -10,7 +10,7 @@ public class Epic extends Task {
     }
 
     public ArrayList<Integer> getSubtaskIds() {
-        return subtaskIds;
+        return new ArrayList<>(subtaskIds);;
     }
 
     public void setSubtaskIds(ArrayList<Integer> subtaskIds) {
@@ -24,7 +24,9 @@ public class Epic extends Task {
 
     // Добавление ID подзадач
     public void addSubtaskId(int subtaskId) {
-        subtaskIds.add(subtaskId);
+        if (subtaskId != this.getId()) {
+            subtaskIds.add(subtaskId);
+        }
     }
 
     // Удаление определенного ID подзадач
