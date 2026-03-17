@@ -68,10 +68,14 @@ public class InMemoryTaskManager implements service.TaskManager {
     @Override
     public Task getTask(int id) {
         Task task = tasks.get(id);
-        if (task != null) {
-            historyManager.add(task);
-        }
-        return task;
+        if (task == null) return null;
+
+        historyManager.add(task);
+
+        Task copy = new Task(task.getName(), task.getDescription(), task.getStatus());
+        copy.setId(task.getId());
+
+        return copy;
     }
 
     @Override

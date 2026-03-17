@@ -162,4 +162,20 @@ class InMemoryTaskManagerTest {
         assertEquals(0, taskManager.getEpicSubtasks(epic.getId()).size(),
                 "После удаления подзадачи эпик не должен содержать её id");
     }
+
+    // Изменение задачи через сеттер не должно влиять на данные внутри менеджера
+    @Test
+    void taskShouldNotChangeInManagerAfterSetterCall() {
+        Task task = new Task("Оригинальное имя", "Описание", Status.NEW);
+        taskManager.createTask(task);
+
+        // Получаем задачу и меняем через сеттер
+        Task savedTask = taskManager.getTask(task.getId());
+        savedTask.setName("Изменённое имя");
+
+        // Проверяем что в менеджере данные не изменились
+        assertEquals("Оригинальное имя",
+                taskManager.getTask(task.getId()).getName(),
+                "Сеттер не должен менять данные задачи внутри менеджера");
+    }
 }
