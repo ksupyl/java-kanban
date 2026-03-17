@@ -100,19 +100,34 @@ public class InMemoryTaskManager implements service.TaskManager {
     @Override
     public Epic getEpic(int id) {
         Epic epic = epics.get(id);
-        if (epic != null) {
-            historyManager.add(epic);
-        }
-        return epic;
+        if (epic == null) return null;
+
+        historyManager.add(epic);
+
+        Epic copy = new Epic(epic.getName(), epic.getDescription());
+        copy.setId(epic.getId());
+        copy.setStatus(epic.getStatus());
+        copy.setSubtaskIds(epic.getSubtaskIds());
+
+        return copy;
     }
 
     @Override
     public Subtask getSubtask(int id) {
         Subtask subtask = subtasks.get(id);
-        if (subtask != null) {
-            historyManager.add(subtask);
-        }
-        return subtask;
+        if (subtask == null) return null;
+
+        historyManager.add(subtask);
+
+        Subtask copy = new Subtask(
+                subtask.getName(),
+                subtask.getDescription(),
+                subtask.getStatus(),
+                subtask.getEpicId()
+        );
+        copy.setId(subtask.getId());
+
+        return copy;
     }
 
     // Возвращение списка истории

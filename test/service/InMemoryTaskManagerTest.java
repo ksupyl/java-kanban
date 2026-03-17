@@ -169,13 +169,67 @@ class InMemoryTaskManagerTest {
         Task task = new Task("Оригинальное имя", "Описание", Status.NEW);
         taskManager.createTask(task);
 
-        // Получаем задачу и меняем через сеттер
         Task savedTask = taskManager.getTask(task.getId());
         savedTask.setName("Изменённое имя");
 
-        // Проверяем что в менеджере данные не изменились
         assertEquals("Оригинальное имя",
                 taskManager.getTask(task.getId()).getName(),
                 "Сеттер не должен менять данные задачи внутри менеджера");
+    }
+
+    // clearTasks() должен удалять задачи из истории
+    @Test
+    void clearTasksShouldRemoveTasksFromHistory() {
+        Task task1 = new Task("Task1", "Desc", Status.NEW);
+        Task task2 = new Task("Task2", "Desc", Status.NEW);
+        taskManager.createTask(task1);
+        taskManager.createTask(task2);
+
+        taskManager.getTask(task1.getId());
+        taskManager.getTask(task2.getId());
+        assertEquals(2, taskManager.getHistory().size(),
+                "Перед очисткой в истории должно быть 2 задачи");
+
+        taskManager.clearTasks();
+
+        assertEquals(0, taskManager.getHistory().size(),
+                "После clearTasks история должна быть пустой");
+    }
+
+    // clearEpics() должен удалять эпики и их подзадачи из истории
+    @Test
+    void clearEpicsShouldRemoveEpicsAndSubtasksFromHistory() {
+        Epic epic = new Epic("Epic", "Desc");
+        taskManager.createEpic(epic);
+
+        Subtask subtask = new Subtask("Sub", "Desc", Status.NEW, epic.getId());
+        taskManager.createSubtask(subtask);
+
+        taskManager.getEpic(epic.getId());
+        taskManager.getSubtask(subtask.getId());
+        assertEquals(2, taskManager.getHistory().size(),
+                "Перед очисткой в истории должно быть 2 элемента");
+
+        taskManager.clearEpics();
+
+        assertEquals(0, taskManager.getHistory().size(),
+                "После clearEpics история должна быть пустой");
+    }
+
+    // Изменение подзадачи через сеттер не должно влиять на данные внутри менеджера
+    @Test
+    void subtaskShouldNotChangeInManagerAfterSetterCall() {
+        Epic epic = new Epic("Epic", "Desc");
+        taskManager.createEpic(epic);
+
+        Subtask subtask = new Subtask("Оригинальное имя", "Описание", Status.NEW, epic.getId());
+        taskManager.createSubtask(subtask);
+
+        Subtask savedSubtask = taskManager.getSubtask(subtask.getId());
+        savedSubtask.setName("Изменённое имя");
+
+        assertEquals("Оригинальное имя",
+                taskManager.getSubtask(subtask.getId()).getName(),
+                "Сеттер не должен менять данные подзадачи внутри менеджера");
     }
 }
