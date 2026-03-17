@@ -45,18 +45,37 @@ public class InMemoryTaskManager implements service.TaskManager {
     // Удаление всех задач для каждого из типов задач(Задача/Эпик/Подзадача)
     @Override
     public void clearTasks() {
+        // Удаление каждой задачи из истории перед очисткой хранилища
+        for (int id : tasks.keySet()) {
+            historyManager.remove(id);
+        }
         tasks.clear();
     }
 
     @Override
     public void clearEpics() {
+        // Сначала удаление всех подзадач из истории
+        for (int id : subtasks.keySet()) {
+            historyManager.remove(id);
+        }
+        // Затем самих эпиков
+        for (int id : epics.keySet()) {
+            historyManager.remove(id);
+        }
+
         epics.clear();
         subtasks.clear();
     }
 
     @Override
     public void clearSubtasks() {
+        // Удаление каждой подзадачи из истории
+        for (int id : subtasks.keySet()) {
+            historyManager.remove(id);
+        }
+
         subtasks.clear();
+
         // Чистка Эпиков, если подзадач больше нет
         for (Epic epic : epics.values()) {
             epic.clearSubtaskIds();
