@@ -232,4 +232,23 @@ class InMemoryTaskManagerTest {
                 taskManager.getSubtask(subtask.getId()).getName(),
                 "Сеттер не должен менять данные подзадачи внутри менеджера");
     }
+
+    // clearSubtasks() должен удалять подзадачи из истории
+    @Test
+    void clearSubtasksShouldRemoveSubtasksFromHistory() {
+        Epic epic = new Epic("Epic", "Desc");
+        taskManager.createEpic(epic);
+
+        Subtask subtask = new Subtask("Sub", "Desc", Status.NEW, epic.getId());
+        taskManager.createSubtask(subtask);
+
+        taskManager.getSubtask(subtask.getId()); // добавление в историю
+        assertEquals(1, taskManager.getHistory().size(),
+                "Перед очисткой в истории должна быть 1 подзадача");
+
+        taskManager.clearSubtasks();
+
+        assertEquals(0, taskManager.getHistory().size(),
+                "После clearSubtasks история должна быть пустой");
+    }
 }

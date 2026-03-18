@@ -31,7 +31,4 @@ class SubtaskTest {
         Assertions.assertEquals(5, subtask.getId(),
                 "Подзадача не должна позволять устанавливать ID, равный EpicID");
     }
-
-
-
 }
