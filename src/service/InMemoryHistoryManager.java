@@ -24,8 +24,8 @@ public class InMemoryHistoryManager implements HistoryManager {
             tail = newNode;
         } else {
             // Иначе подвешивание к хвосту
-            tail.next = newNode;
-            newNode.prev = tail;
+            tail.setNext(newNode);
+            newNode.setPrev(tail);
             tail = newNode;
         }
         // Сохранение узла в индексе
@@ -36,24 +36,24 @@ public class InMemoryHistoryManager implements HistoryManager {
     private void removeNode(Node node) {
         if (node == null) return;
 
-        Node prevNode = node.prev;
-        Node nextNode = node.next;
+        Node prevNode = node.getPrev();
+        Node nextNode = node.getNext();
 
         if (prevNode != null) {
-            prevNode.next = nextNode;  // левый сосед смотрит на правого
+            prevNode.setNext(nextNode);  // левый сосед смотрит на правого
         } else {
             head = nextNode;           // удаление головы и новая голова - это следующий
         }
 
         if (nextNode != null) {
-            nextNode.prev = prevNode;  // правый сосед теперь смотрит на левого
+            nextNode.setPrev(prevNode);  // правый сосед теперь смотрит на левого
         } else {
             tail = prevNode;           // удаление хвоста и новый хвост - это предыдущий
         }
 
         // Обнуление ссылок удалённого узла (помощь Garbage Collector)
-        node.prev = null;
-        node.next = null;
+        node.setPrev(null);
+        node.setNext(null);
     }
 
     // Сбор задач всех из двусвязного списка в ArrayList
@@ -61,8 +61,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         List<Task> result = new ArrayList<>();
         Node current = head;
         while (current != null) {
-            result.add(current.task);
-            current = current.next;
+            result.add(current.getTask());
+            current = current.getNext();
         }
         return result;
     }
@@ -73,17 +73,13 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (task == null) return;
 
         // Если задача уже в истории = удаление старого просмотра
-        if (historyMap.containsKey(task.getId())) {
-            removeNode(historyMap.get(task.getId()));
-            historyMap.remove(task.getId()); // убирание из индекса
+        Node existingNode = historyMap.remove(task.getId());
+        if (existingNode != null) {
+            removeNode(existingNode);
         }
 
-        // Создание копии, чтобы история хранила снимок состояния на момент просмотра
-        Task copy = new Task(task.getName(), task.getDescription(), task.getStatus());
-        copy.setId(task.getId());
-
         // Добавление копии в конец списка
-        linkLast(copy);
+        linkLast(task);
     }
 
     // Удаление задачи из истории по id
