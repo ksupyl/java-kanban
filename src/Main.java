@@ -9,7 +9,7 @@ import service.Managers;
 public class Main {
 
     // Метод для разделительной строки
-    private static void printDelimiter(){
+    private static void printDelimiter() {
         System.out.println();
         System.out.println("-".repeat(30));
     }
