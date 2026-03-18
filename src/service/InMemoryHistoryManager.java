@@ -8,17 +8,6 @@ import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    // Двусвязный список с самой задачей и ссылками на соседей
-    private static class Node {
-        Task task;
-        Node prev;
-        Node next;
-
-        Node(Task task) {
-            this.task = task;
-        }
-    }
-
     // Голова и хвост двусвязного списка
     private Node head;
     private Node tail;
@@ -83,13 +72,18 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void add(Task task) {
         if (task == null) return;
 
-        // Если задача уже в истории, значит удаление старого просмотра
+        // Если задача уже в истории = удаление старого просмотра
         if (historyMap.containsKey(task.getId())) {
             removeNode(historyMap.get(task.getId()));
+            historyMap.remove(task.getId()); // убирание из индекса
         }
 
-        // Добавление в конец списка и обновление индекса
-        linkLast(task);
+        // Создание копии, чтобы история хранила снимок состояния на момент просмотра
+        Task copy = new Task(task.getName(), task.getDescription(), task.getStatus());
+        copy.setId(task.getId());
+
+        // Добавление копии в конец списка
+        linkLast(copy);
     }
 
     // Удаление задачи из истории по id
