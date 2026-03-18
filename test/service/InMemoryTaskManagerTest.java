@@ -251,4 +251,21 @@ class InMemoryTaskManagerTest {
         assertEquals(0, taskManager.getHistory().size(),
                 "После clearSubtasks история должна быть пустой");
     }
+
+    // Проверка неизменности эпика по всем полям при добавлении в менеджер
+    @Test
+    void epicShouldBeUnchangedAfterAddingToManager() {
+        String expectedName = "Оригинальный эпик";
+        String expectedDescription = "Описание эпика";
+
+        Epic epic = new Epic(expectedName, expectedDescription);
+        taskManager.createEpic(epic);
+
+        Epic savedEpic = taskManager.getEpic(epic.getId());
+
+        assertEquals(expectedName, savedEpic.getName(),
+                "Имя эпика изменилось при сохранении");
+        assertEquals(expectedDescription, savedEpic.getDescription(),
+                "Описание эпика изменилось при сохранении");
+    }
 }
