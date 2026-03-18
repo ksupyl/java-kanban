@@ -1,5 +1,7 @@
 package service;
 
+import model.Epic;
+import model.Subtask;
 import model.Task;
 
 import java.util.ArrayList;
@@ -15,9 +17,35 @@ public class InMemoryHistoryManager implements HistoryManager {
     // В HashMap ключ = id задачи, значение = узел в списке
     private final HashMap<Integer, Node> historyMap = new HashMap<>();
 
+    // Создание снимка задачи, чтобы история не зависела от внешних изменений
+    private Task makeSnapshot(Task task) {
+        if (task instanceof Subtask) {
+            Subtask original = (Subtask) task;
+            Subtask copy = new Subtask(
+                    original.getName(),
+                    original.getDescription(),
+                    original.getStatus(),
+                    original.getEpicId()
+            );
+            copy.setId(original.getId());
+            return copy;
+        } else if (task instanceof Epic) {
+            Epic original = (Epic) task;
+            Epic copy = new Epic(original.getName(), original.getDescription());
+            copy.setId(original.getId());
+            copy.setStatus(original.getStatus());
+            copy.setSubtaskIds(original.getSubtaskIds());
+            return copy;
+        } else {
+            Task copy = new Task(task.getName(), task.getDescription(), task.getStatus());
+            copy.setId(task.getId());
+            return copy;
+        }
+    }
+
     // Добавление задачи в конец двусвязного списка
     private void linkLast(Task task) {
-        Node newNode = new Node(task);
+        Node newNode = new Node(makeSnapshot(task));
         if (tail == null) {
             // Если список пустой, то полностью новый узел - и голова, и хвост
             head = newNode;

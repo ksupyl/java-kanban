@@ -150,4 +150,31 @@ class InMemoryHistoryManagerTest {
         assertEquals(3, history.get(1).getId(), "Второй должна быть task3");
         assertEquals(1, history.get(2).getId(), "Последней должна быть task1");
     }
+
+    // Пустая история должна возвращать пустой список
+    @Test
+    void emptyHistoryShouldReturnEmptyList() {
+        List<Task> history = historyManager.getHistory();
+        assertNotNull(history, "getHistory() не должен возвращать null");
+        assertEquals(0, history.size(), "Пустая история должна содержать 0 элементов");
+    }
+
+    // Статус задачи в истории не должен меняться при изменении оригинала через сеттер
+    @Test
+    void historyShouldStoreSnapshotNotReference() {
+        Task task = new Task("Task", "Desc", Status.NEW);
+        task.setId(1);
+
+        historyManager.add(task);
+
+        // Меняем оригинал после добавления в историю
+        task.setName("Изменённое имя");
+        task.setStatus(Status.DONE);
+
+        Task inHistory = historyManager.getHistory().get(0);
+        assertEquals("Task", inHistory.getName(),
+                "История должна хранить снимок: имя не должно измениться");
+        assertEquals(Status.NEW, inHistory.getStatus(),
+                "История должна хранить снимок: статус не должен измениться");
+    }
 }
