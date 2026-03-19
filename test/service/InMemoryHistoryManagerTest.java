@@ -38,4 +38,143 @@ class InMemoryHistoryManagerTest {
         assertEquals(task.getStatus(), history.get(0).getStatus(), "Статус задачи в истории не совпадает");
         assertEquals(task.getId(), history.get(0).getId(), "ID задачи в истории не совпадает");
     }
+
+    // При повторном добавлении задачи в историю дубликат не создастся
+    @Test
+    void addShouldNotCreateDuplicates() {
+        Task task = new Task("Task", "Description", Status.NEW);
+        task.setId(1);
+
+        historyManager.add(task);
+        historyManager.add(task); // добавляем второй раз
+        historyManager.add(task); // и третий
+
+        assertEquals(1, historyManager.getHistory().size(), "История не должна содержать дубликаты");
+    }
+
+    // История не должна ограничиваться 10 элементами
+    @Test
+    void historyShouldBeUnlimited() {
+        for (int i = 1; i <= 15; i++) {
+            Task task = new Task("Task " + i, "Description", Status.NEW);
+            task.setId(i);
+            historyManager.add(task);
+        }
+
+        assertEquals(15, historyManager.getHistory().size(), "История должна хранить более 10 элементов");
+    }
+
+    // Удаление из начала истории
+    @Test
+    void removeShouldDeleteFromBeginning() {
+        Task task1 = new Task("Task1", "Desc", Status.NEW);
+        task1.setId(1);
+        Task task2 = new Task("Task2", "Desc", Status.NEW);
+        task2.setId(2);
+        Task task3 = new Task("Task3", "Desc", Status.NEW);
+        task3.setId(3);
+
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+
+        historyManager.remove(1); // удаление первой - головы
+
+        List<Task> history = historyManager.getHistory();
+        assertEquals(2, history.size(), "В истории должно остаться 2 задачи");
+        assertEquals(2, history.get(0).getId(), "Первой должна быть task2");
+    }
+
+    // Удаление из середины истории
+    @Test
+    void removeShouldDeleteFromMiddle() {
+        Task task1 = new Task("Task1", "Desc", Status.NEW);
+        task1.setId(1);
+        Task task2 = new Task("Task2", "Desc", Status.NEW);
+        task2.setId(2);
+        Task task3 = new Task("Task3", "Desc", Status.NEW);
+        task3.setId(3);
+
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+
+        historyManager.remove(2); // удаление из середины
+
+        List<Task> history = historyManager.getHistory();
+        assertEquals(2, history.size(), "В истории должно остаться 2 задачи");
+        assertEquals(1, history.get(0).getId(), "Первой должна быть task1");
+        assertEquals(3, history.get(1).getId(), "Второй должна быть task3");
+    }
+
+    // Удаление из конца истории
+    @Test
+    void removeShouldDeleteFromEnd() {
+        Task task1 = new Task("Task1", "Desc", Status.NEW);
+        task1.setId(1);
+        Task task2 = new Task("Task2", "Desc", Status.NEW);
+        task2.setId(2);
+        Task task3 = new Task("Task3", "Desc", Status.NEW);
+        task3.setId(3);
+
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+
+        historyManager.remove(3); // удаление последней - хвоста
+
+        List<Task> history = historyManager.getHistory();
+        assertEquals(2, history.size(), "В истории должно остаться 2 задачи");
+        assertEquals(2, history.get(1).getId(), "Последней должна быть task2");
+    }
+
+    // Повторный просмотр задачи должен переместить её в конец истории
+    @Test
+    void repeatedViewShouldMoveTaskToEnd() {
+        Task task1 = new Task("Task1", "Desc", Status.NEW);
+        task1.setId(1);
+        Task task2 = new Task("Task2", "Desc", Status.NEW);
+        task2.setId(2);
+        Task task3 = new Task("Task3", "Desc", Status.NEW);
+        task3.setId(3);
+
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        historyManager.add(task1); // task1 повторно — должна уйти в конец
+
+        List<Task> history = historyManager.getHistory();
+
+        assertEquals(3, history.size(), "Дубликатов быть не должно");
+        assertEquals(2, history.get(0).getId(), "Первой должна быть task2");
+        assertEquals(3, history.get(1).getId(), "Второй должна быть task3");
+        assertEquals(1, history.get(2).getId(), "Последней должна быть task1");
+    }
+
+    // Пустая история должна возвращать пустой список
+    @Test
+    void emptyHistoryShouldReturnEmptyList() {
+        List<Task> history = historyManager.getHistory();
+        assertNotNull(history, "getHistory() не должен возвращать null");
+        assertEquals(0, history.size(), "Пустая история должна содержать 0 элементов");
+    }
+
+    // Статус задачи в истории не должен меняться при изменении оригинала через сеттер
+    @Test
+    void historyShouldStoreSnapshotNotReference() {
+        Task task = new Task("Task", "Desc", Status.NEW);
+        task.setId(1);
+
+        historyManager.add(task);
+
+        // Меняем оригинал после добавления в историю
+        task.setName("Изменённое имя");
+        task.setStatus(Status.DONE);
+
+        Task inHistory = historyManager.getHistory().get(0);
+        assertEquals("Task", inHistory.getName(),
+                "История должна хранить снимок: имя не должно измениться");
+        assertEquals(Status.NEW, inHistory.getStatus(),
+                "История должна хранить снимок: статус не должен измениться");
+    }
 }

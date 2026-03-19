@@ -24,11 +24,11 @@ class SubtaskTest {
     public void subtaskCannotBeEpic() {
         Subtask subtask = new Subtask("Subtask", "Description", Status.NEW, 3);
 
+        subtask.setId(5);
+        Assertions.assertEquals(5, subtask.getId(), "Корректный id должен установиться");
+
         subtask.setId(3);
-
-        Assertions.assertNotEquals(3, subtask.getId(), "Подзадача не должна позволять устанавливать ID, равный EpicID");
+        Assertions.assertEquals(5, subtask.getId(),
+                "Подзадача не должна позволять устанавливать ID, равный EpicID");
     }
-
-
-
 }

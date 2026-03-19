@@ -45,18 +45,37 @@ public class InMemoryTaskManager implements service.TaskManager {
     // Удаление всех задач для каждого из типов задач(Задача/Эпик/Подзадача)
     @Override
     public void clearTasks() {
+        // Удаление каждой задачи из истории перед очисткой хранилища
+        for (int id : tasks.keySet()) {
+            historyManager.remove(id);
+        }
         tasks.clear();
     }
 
     @Override
     public void clearEpics() {
+        // Сначала удаление всех подзадач из истории
+        for (int id : subtasks.keySet()) {
+            historyManager.remove(id);
+        }
+        // Затем самих эпиков
+        for (int id : epics.keySet()) {
+            historyManager.remove(id);
+        }
+
         epics.clear();
         subtasks.clear();
     }
 
     @Override
     public void clearSubtasks() {
+        // Удаление каждой подзадачи из истории
+        for (int id : subtasks.keySet()) {
+            historyManager.remove(id);
+        }
+
         subtasks.clear();
+
         // Чистка Эпиков, если подзадач больше нет
         for (Epic epic : epics.values()) {
             epic.clearSubtaskIds();
@@ -68,28 +87,47 @@ public class InMemoryTaskManager implements service.TaskManager {
     @Override
     public Task getTask(int id) {
         Task task = tasks.get(id);
-        if (task != null) {
-            historyManager.add(task);
-        }
-        return task;
+        if (task == null) return null;
+
+        historyManager.add(task);
+
+        Task copy = new Task(task.getName(), task.getDescription(), task.getStatus());
+        copy.setId(task.getId());
+
+        return copy;
     }
 
     @Override
     public Epic getEpic(int id) {
         Epic epic = epics.get(id);
-        if (epic != null) {
-            historyManager.add(epic);
-        }
-        return epic;
+        if (epic == null) return null;
+
+        historyManager.add(epic);
+
+        Epic copy = new Epic(epic.getName(), epic.getDescription());
+        copy.setId(epic.getId());
+        copy.setStatus(epic.getStatus());
+        copy.setSubtaskIds(epic.getSubtaskIds());
+
+        return copy;
     }
 
     @Override
     public Subtask getSubtask(int id) {
         Subtask subtask = subtasks.get(id);
-        if (subtask != null) {
-            historyManager.add(subtask);
-        }
-        return subtask;
+        if (subtask == null) return null;
+
+        historyManager.add(subtask);
+
+        Subtask copy = new Subtask(
+                subtask.getName(),
+                subtask.getDescription(),
+                subtask.getStatus(),
+                subtask.getEpicId()
+        );
+        copy.setId(subtask.getId());
+
+        return copy;
     }
 
     // Возвращение списка истории
@@ -197,6 +235,7 @@ public class InMemoryTaskManager implements service.TaskManager {
     @Override
     public void deleteTask(int id) {
         tasks.remove(id);
+        historyManager.remove(id);
     }
 
     @Override
@@ -206,8 +245,10 @@ public class InMemoryTaskManager implements service.TaskManager {
             // Удаление подзадач, связанных с этим Эпиком
             for (Integer subtaskId : epic.getSubtaskIds()) {
                 subtasks.remove(subtaskId);
+                historyManager.remove(subtaskId);
             }
         }
+        historyManager.remove(id);
     }
 
     @Override
@@ -221,18 +262,18 @@ public class InMemoryTaskManager implements service.TaskManager {
                 updateEpicStatus(epic);
             }
         }
+        historyManager.remove(id);
     }
 
     // Получение списка всех Подзадач для определённого Эпика
-    @Override
     public ArrayList<Subtask> getEpicSubtasks(int epicId) {
-        ArrayList<Subtask> tasks = new ArrayList<>();
+        ArrayList<Subtask> result = new ArrayList<>();
         Epic epic = epics.get(epicId);
         if (epic != null) {
             for (int subtaskId : epic.getSubtaskIds()) {
-                tasks.add(subtasks.get(subtaskId));
+                result.add(subtasks.get(subtaskId));
             }
         }
-        return tasks;
+        return result;
     }
 }
