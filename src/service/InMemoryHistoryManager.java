@@ -49,13 +49,13 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (tail == null) {
             // Если список пустой, то полностью новый узел - и голова, и хвост
             head = newNode;
-            tail = newNode;
         } else {
             // Иначе подвешивание к хвосту
             tail.setNext(newNode);
             newNode.setPrev(tail);
-            tail = newNode;
         }
+        tail = newNode;
+
         // Сохранение узла в индексе
         historyMap.put(task.getId(), newNode);
     }
