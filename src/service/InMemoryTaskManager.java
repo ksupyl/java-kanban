@@ -276,4 +276,26 @@ public class InMemoryTaskManager implements service.TaskManager {
         }
         return result;
     }
+
+    // Служебные методы для восстановления менеджера из файла
+    protected void putLoadedTask(Task task) {
+        tasks.put(task.getId(), task);
+    }
+
+    protected void putLoadedEpic(Epic epic) {
+        epics.put(epic.getId(), epic);
+    }
+
+    protected void putLoadedSubtask(Subtask subtask) {
+        subtasks.put(subtask.getId(), subtask);
+
+        Epic epic = epics.get(subtask.getEpicId());
+        if (epic != null) {
+            epic.addSubtaskId(subtask.getId());
+        }
+    }
+
+    protected void setNextId(int nextId) {
+        this.nextId = nextId;
+    }
 }
