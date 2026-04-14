@@ -17,7 +17,7 @@ public class Epic extends Task {
     }
 
     public void setSubtaskIds(ArrayList<Integer> subtaskIds) {
-        this.subtaskIds = subtaskIds;
+        this.subtaskIds = new ArrayList<>(subtaskIds);
     }
 
     // Очищение всех ID подзадач
