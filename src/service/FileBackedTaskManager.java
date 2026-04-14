@@ -6,8 +6,10 @@ import model.Subtask;
 import model.Task;
 import model.TaskType;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.TreeMap;
@@ -98,6 +100,41 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         task.setId(id);
         return task;
+    }
+
+    // Восстанавливает менеджер из CSV-файла
+    public static FileBackedTaskManager loadFromFile(File file) {
+        FileBackedTaskManager manager = new FileBackedTaskManager(file);
+        int maxId = 0;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line = reader.readLine(); // пропуск заголовка
+
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) {
+                    continue;
+                }
+
+                Task task = fromString(line);
+
+                if (task instanceof Subtask) {
+                    manager.putLoadedSubtask((Subtask) task);
+                } else if (task instanceof Epic) {
+                    manager.putLoadedEpic((Epic) task);
+                } else {
+                    manager.putLoadedTask(task);
+                }
+
+                if (task.getId() > maxId) {
+                    maxId = task.getId();
+                }
+            }
+
+            manager.setNextId(maxId + 1);
+            return manager;
+        } catch (IOException e) {
+            throw new ManagerSaveException("Failed to load tasks from file: " + file, e);
+        }
     }
 
     // После каждого изменения сохраняем состояние менеджера в файл
