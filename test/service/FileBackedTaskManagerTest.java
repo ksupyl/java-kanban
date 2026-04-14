@@ -28,5 +28,28 @@ class FileBackedTaskManagerTest {
         assertTrue(loadedManager.getSubtasks().isEmpty(), "Список подзадач должен быть пустым");
     }
 
+    // Тест на сохранение нескольких задач
+    @Test
+    void shouldSaveMultipleTasks() throws IOException {
+        File tempFile = File.createTempFile("tasks", ".csv");
 
+        FileBackedTaskManager manager = new FileBackedTaskManager(tempFile);
+
+        Task task = new Task("Task1", "Description1", Status.NEW);
+        manager.createTask(task);
+
+        Epic epic = new Epic("Epic1", "Description epic");
+        manager.createEpic(epic);
+
+        Subtask subtask = new Subtask("Subtask1", "Description sub", Status.NEW, epic.getId());
+        manager.createSubtask(subtask);
+
+        manager.save();
+
+        FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
+
+        assertEquals(1, loadedManager.getTasks().size(), "Должна быть 1 задача");
+        assertEquals(1, loadedManager.getEpics().size(), "Должен быть 1 эпик");
+        assertEquals(1, loadedManager.getSubtasks().size(), "Должна быть 1 подзадача");
+    }
 }
