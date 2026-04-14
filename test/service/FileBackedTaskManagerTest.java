@@ -44,8 +44,6 @@ class FileBackedTaskManagerTest {
         Subtask subtask = new Subtask("Subtask1", "Description sub", Status.NEW, epic.getId());
         manager.createSubtask(subtask);
 
-        manager.save();
-
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
 
         assertEquals(1, loadedManager.getTasks().size(), "Должна быть 1 задача");
@@ -66,8 +64,10 @@ class FileBackedTaskManagerTest {
         Epic epic = new Epic("Epic1", "Description epic");
         manager.createEpic(epic);
 
-        Subtask subtask = new Subtask("Subtask1", "Description sub", Status.DONE, epic.getId());
+        Subtask subtask = new Subtask("Subtask1", "Description sub", Status.NEW, epic.getId());
         manager.createSubtask(subtask);
+
+        subtask.setStatus(Status.DONE);
         manager.updateSubtask(subtask);
 
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
@@ -88,5 +88,9 @@ class FileBackedTaskManagerTest {
         assertEquals("Description sub", loadedSubtask.getDescription(), "Описание подзадачи должно совпадать");
         assertEquals(Status.DONE, loadedSubtask.getStatus(), "Статус подзадачи должен совпадать");
         assertEquals(epic.getId(), loadedSubtask.getEpicId(), "Epic ID подзадачи должен совпадать");
+
+        assertEquals(task.getId(), loadedTask.getId(), "ID задачи должен совпадать");
+        assertEquals(epic.getId(), loadedEpic.getId(), "ID эпика должен совпадать");
+        assertEquals(subtask.getId(), loadedSubtask.getId(), "ID подзадачи должен совпадать");
     }
 }
