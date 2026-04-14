@@ -1,6 +1,7 @@
 package service;
 
 import model.Epic;
+import model.Status;
 import model.Subtask;
 import model.Task;
 import model.TaskType;
@@ -71,6 +72,32 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
 
         return builder.toString();
+    }
+
+    // Преобразует строку CSV в объект задачи
+    private static Task fromString(String value) {
+        String[] fields = value.split(",", -1);
+
+        int id = Integer.parseInt(fields[0]);
+        TaskType taskType = TaskType.valueOf(fields[1]);
+        String name = fields[2];
+        Status status = Status.valueOf(fields[3]);
+        String description = fields[4];
+
+        Task task;
+
+        if (taskType == TaskType.TASK) {
+            task = new Task(name, description, status);
+        } else if (taskType == TaskType.EPIC) {
+            task = new Epic(name, description);
+            task.setStatus(status);
+        } else {
+            int epicId = Integer.parseInt(fields[5]);
+            task = new Subtask(name, description, status, epicId);
+        }
+
+        task.setId(id);
+        return task;
     }
 
     // После каждого изменения сохраняем состояние менеджера в файл
