@@ -18,6 +18,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.file = file;
     }
 
+    // Сохраняет текущее состояние менеджера в CSV-файл
     public void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write("id,type,name,status,description,epic");
@@ -46,6 +47,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
+    // Преобразует задачу в строку формата CSV
     private String toString(Task task) {
         StringBuilder builder = new StringBuilder();
 
@@ -69,5 +71,81 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
 
         return builder.toString();
+    }
+
+    // После каждого изменения сохраняем состояние менеджера в файл
+    @Override
+    public void clearTasks() {
+        super.clearTasks();
+        save();
+    }
+
+    @Override
+    public void clearEpics() {
+        super.clearEpics();
+        save();
+    }
+
+    @Override
+    public void clearSubtasks() {
+        super.clearSubtasks();
+        save();
+    }
+
+    @Override
+    public Task createTask(Task task) {
+        Task createdTask = super.createTask(task);
+        save();
+        return createdTask;
+    }
+
+    @Override
+    public Epic createEpic(Epic epic) {
+        Epic createdEpic = super.createEpic(epic);
+        save();
+        return createdEpic;
+    }
+
+    @Override
+    public Subtask createSubtask(Subtask subtask) {
+        Subtask createdSubtask = super.createSubtask(subtask);
+        save();
+        return createdSubtask;
+    }
+
+    @Override
+    public void updateTask(Task task) {
+        super.updateTask(task);
+        save();
+    }
+
+    @Override
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
+        save();
+    }
+
+    @Override
+    public void updateSubtask(Subtask subtask) {
+        super.updateSubtask(subtask);
+        save();
+    }
+
+    @Override
+    public void deleteTask(int id) {
+        super.deleteTask(id);
+        save();
+    }
+
+    @Override
+    public void deleteEpic(int id) {
+        super.deleteEpic(id);
+        save();
+    }
+
+    @Override
+    public void deleteSubtask(int id) {
+        super.deleteSubtask(id);
+        save();
     }
 }
