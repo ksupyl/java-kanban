@@ -216,4 +216,59 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         super.deleteSubtask(id);
         save();
     }
+
+    // Демонстрационный сценарий работы файлового менеджера
+    public static void main(String[] args) {
+        File file = new File("tasks.csv");
+
+        FileBackedTaskManager manager = new FileBackedTaskManager(file);
+
+        // Создание обычных задач
+        Task task1 = new Task("Task1", "Description of task 1", Status.NEW);
+        Task task2 = new Task("Task2", "Description of task 2", Status.NEW);
+        manager.createTask(task1);
+        manager.createTask(task2);
+
+        // Создание эпика
+        Epic epic1 = new Epic("Epic1", "Description of epic 1");
+        manager.createEpic(epic1);
+
+        // Создание подзадач для эпика
+        Subtask subtask1 = new Subtask("Subtask1", "Description of subtask 1", Status.NEW, epic1.getId());
+        Subtask subtask2 = new Subtask("Subtask2", "Description of subtask 2", Status.NEW, epic1.getId());
+        manager.createSubtask(subtask1);
+        manager.createSubtask(subtask2);
+
+        // Меняем статус одной подзадачи для проверки пересчёта эпика
+        subtask1.setStatus(Status.DONE);
+        manager.updateSubtask(subtask1);
+
+        // Загрузка нового менеджера из того же файла
+        FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(file);
+
+        // Вывод данных из нового менеджера
+        System.out.println("Обычные задачи из загруженного менеджера:");
+        for (Task task : loadedManager.getTasks()) {
+            System.out.println(task);
+        }
+
+        System.out.println("Эпики из загруженного менеджера:");
+        for (Epic epic : loadedManager.getEpics()) {
+            System.out.println(epic);
+        }
+
+        System.out.println("Подзадачи из загруженного менеджера:");
+        for (Subtask subtask : loadedManager.getSubtasks()) {
+            System.out.println(subtask);
+        }
+
+        // Проверка, что данные действительно загрузились
+        if (loadedManager.getTasks().size() == manager.getTasks().size()
+                && loadedManager.getEpics().size() == manager.getEpics().size()
+                && loadedManager.getSubtasks().size() == manager.getSubtasks().size()) {
+            System.out.println("Данные успешно сохранены и загружены.");
+        } else {
+            System.out.println("Ошибка: данные после загрузки не совпадают.");
+        }
+    }
 }
