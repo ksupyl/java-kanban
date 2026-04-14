@@ -130,6 +130,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
 
+            for (Epic epic : manager.getLoadedEpics()) {
+                manager.updateEpicStatus(epic);
+            }
+
             manager.setNextId(maxId + 1);
             return manager;
         } catch (IOException e) {
