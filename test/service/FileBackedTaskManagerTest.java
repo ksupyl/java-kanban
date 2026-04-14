@@ -52,4 +52,41 @@ class FileBackedTaskManagerTest {
         assertEquals(1, loadedManager.getEpics().size(), "Должен быть 1 эпик");
         assertEquals(1, loadedManager.getSubtasks().size(), "Должна быть 1 подзадача");
     }
+
+    // Тест на загрузку нескольких задач из файла
+    @Test
+    void shouldLoadMultipleTasks() throws IOException {
+        File tempFile = File.createTempFile("tasks", ".csv");
+
+        FileBackedTaskManager manager = new FileBackedTaskManager(tempFile);
+
+        Task task = new Task("Task1", "Description1", Status.NEW);
+        manager.createTask(task);
+
+        Epic epic = new Epic("Epic1", "Description epic");
+        manager.createEpic(epic);
+
+        Subtask subtask = new Subtask("Subtask1", "Description sub", Status.DONE, epic.getId());
+        manager.createSubtask(subtask);
+        manager.updateSubtask(subtask);
+
+        FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
+
+        Task loadedTask = loadedManager.getTasks().get(0);
+        Epic loadedEpic = loadedManager.getEpics().get(0);
+        Subtask loadedSubtask = loadedManager.getSubtasks().get(0);
+
+        assertEquals("Task1", loadedTask.getName(), "Имя задачи должно совпадать");
+        assertEquals("Description1", loadedTask.getDescription(), "Описание задачи должно совпадать");
+        assertEquals(Status.NEW, loadedTask.getStatus(), "Статус задачи должен совпадать");
+
+        assertEquals("Epic1", loadedEpic.getName(), "Имя эпика должно совпадать");
+        assertEquals("Description epic", loadedEpic.getDescription(), "Описание эпика должно совпадать");
+        assertEquals(Status.DONE, loadedEpic.getStatus(), "Статус эпика должен пересчитаться по подзадаче");
+
+        assertEquals("Subtask1", loadedSubtask.getName(), "Имя подзадачи должно совпадать");
+        assertEquals("Description sub", loadedSubtask.getDescription(), "Описание подзадачи должно совпадать");
+        assertEquals(Status.DONE, loadedSubtask.getStatus(), "Статус подзадачи должен совпадать");
+        assertEquals(epic.getId(), loadedSubtask.getEpicId(), "Epic ID подзадачи должен совпадать");
+    }
 }
