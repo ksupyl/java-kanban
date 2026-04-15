@@ -55,14 +55,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         StringBuilder builder = new StringBuilder();
 
         builder.append(task.getId()).append(",");
-
-        if (task instanceof Subtask) {
-            builder.append(TaskType.SUBTASK).append(",");
-        } else if (task instanceof Epic) {
-            builder.append(TaskType.EPIC).append(",");
-        } else {
-            builder.append(TaskType.TASK).append(",");
-        }
+        builder.append(task.getType()).append(",");
 
         builder.append(task.getName()).append(",");
         builder.append(task.getStatus()).append(",");
@@ -117,21 +110,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
                 Task task = fromString(line);
 
-                if (task instanceof Subtask) {
-                    manager.putLoadedSubtask((Subtask) task);
-                } else if (task instanceof Epic) {
-                    manager.putLoadedEpic((Epic) task);
-                } else {
-                    manager.putLoadedTask(task);
+                switch (task.getType()) {
+                    case TASK:
+                        manager.putLoadedTask(task);
+                        break;
+                    case EPIC:
+                        manager.putLoadedEpic((Epic) task);
+                        break;
+                    case SUBTASK:
+                        manager.putLoadedSubtask((Subtask) task);
+                        break;
                 }
 
                 if (task.getId() > maxId) {
                     maxId = task.getId();
                 }
-            }
-
-            for (Epic epic : manager.getLoadedEpics()) {
-                manager.updateEpicStatus(epic);
             }
 
             manager.setNextId(maxId + 1);
