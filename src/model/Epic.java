@@ -14,7 +14,7 @@ public class Epic extends Task {
     }
 
     public void setSubtaskIds(ArrayList<Integer> subtaskIds) {
-        this.subtaskIds = subtaskIds;
+        this.subtaskIds = new ArrayList<>(subtaskIds);
     }
 
     // Очищение всех ID подзадач
@@ -32,6 +32,11 @@ public class Epic extends Task {
     // Удаление определенного ID подзадач
     public void removeSubtaskId(Integer subtaskId) {
         subtaskIds.remove(subtaskId);
+    }
+
+    @Override
+    public TaskType getType() {
+        return TaskType.EPIC;
     }
 
     @Override
