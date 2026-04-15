@@ -6,7 +6,9 @@ import model.Subtask;
 import model.Task;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,8 +20,10 @@ class FileBackedTaskManagerTest {
     void shouldSaveAndLoadEmptyManager() throws IOException {
         File tempFile = File.createTempFile("tasks", ".csv");
 
-        FileBackedTaskManager manager = new FileBackedTaskManager(tempFile);
-        manager.save();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+            writer.write("id,type,name,status,description,epic");
+            writer.newLine();
+        }
 
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
 
