@@ -22,7 +22,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     // Сохраняет текущее состояние менеджера в CSV-файл
-    public void save() {
+    private void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write("id,type,name,status,description,epic");
             writer.newLine();
