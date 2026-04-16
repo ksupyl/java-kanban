@@ -474,7 +474,53 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(Duration.ofMinutes(40), savedEpic.getDuration(), "Продолжительность эпика должна пересчитаться.");
     }
 
-    // // Проверка удаления задач, подзадач и эпиков
+    // Проверка получения списка подзадач эпика
+    @Test
+    void shouldReturnEmptyListForEpicWithoutSubtasks() {
+        Epic epic = taskManager.createEpic(new Epic("Epic", "Description"));
+
+        List<Subtask> epicSubtasks = taskManager.getEpicSubtasks(epic.getId());
+
+        assertTrue(epicSubtasks.isEmpty(), "У нового эпика список подзадач должен быть пустым.");
+    }
+
+    @Test
+    void shouldReturnEmptyListForNonExistingEpicSubtasks() {
+        List<Subtask> epicSubtasks = taskManager.getEpicSubtasks(999);
+
+        assertTrue(epicSubtasks.isEmpty(), "Для несуществующего эпика должен возвращаться пустой список.");
+    }
+
+    // Проверка сортировки задач и подзадач в приоритетном списке
+    @Test
+    void shouldReturnTasksAndSubtasksSortedByStartTime() {
+        Epic epic = taskManager.createEpic(new Epic("Epic", "Description"));
+
+        Task task = taskManager.createTask(new Task(
+                "Task",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2026, 4, 16, 12, 0)
+        ));
+
+        Subtask subtask = taskManager.createSubtask(new Subtask(
+                "Subtask",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(20),
+                LocalDateTime.of(2026, 4, 16, 10, 0),
+                epic.getId()
+        ));
+
+        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+
+        assertEquals(2, prioritizedTasks.size(), "В приоритетном списке должны быть задача и подзадача.");
+        assertEquals(subtask.getId(), prioritizedTasks.get(0).getId(), "Подзадача с более ранним startTime должна быть первой.");
+        assertEquals(task.getId(), prioritizedTasks.get(1).getId(), "Задача с более поздним startTime должна быть второй.");
+    }
+
+    // Проверка удаления задач, подзадач и эпиков
     @Test
     void shouldDeleteTaskById() {
         Task task = taskManager.createTask(new Task(
