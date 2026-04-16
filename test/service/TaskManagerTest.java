@@ -590,4 +590,45 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getSubtasks().isEmpty(), "Список подзадач должен остаться пустым.");
     }
 
+    // Проверка пересечения временных интервалов задач и подзадач
+    @Test
+    void shouldAllowTasksThatTouchBordersButDoNotOverlap() {
+        taskManager.createTask(new Task(
+                "Task 1",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(60),
+                LocalDateTime.of(2026, 4, 16, 10, 0)
+        ));
+
+        assertDoesNotThrow(() -> taskManager.createTask(new Task(
+                "Task 2",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2026, 4, 16, 11, 0)
+        )), "Задачи, соприкасающиеся границами, не должны считаться пересекающимися.");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCreatingOverlappingSubtask() {
+        Epic epic = taskManager.createEpic(new Epic("Epic", "Description"));
+
+        taskManager.createTask(new Task(
+                "Task 1",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(60),
+                LocalDateTime.of(2026, 4, 16, 10, 0)
+        ));
+
+        assertThrows(IllegalArgumentException.class, () -> taskManager.createSubtask(new Subtask(
+                "Subtask",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(20),
+                LocalDateTime.of(2026, 4, 16, 10, 30),
+                epic.getId()
+        )), "Подзадача не должна создаваться, если пересекается по времени с другой задачей.");
+    }
 }
