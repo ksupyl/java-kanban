@@ -210,7 +210,6 @@ public class InMemoryTaskManager implements service.TaskManager {
         }
 
         task.setId(getNextId());
-        task.setStatus(Status.NEW);
         tasks.put(task.getId(), task);
         addTaskToPrioritizedTasks(task);
 
