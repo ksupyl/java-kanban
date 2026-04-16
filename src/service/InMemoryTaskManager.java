@@ -343,12 +343,14 @@ public class InMemoryTaskManager implements service.TaskManager {
     @Override
     public void updateSubtask(Subtask subtask) {
         if (subtasks.containsKey(subtask.getId())) {
+            Subtask oldSubtask = subtasks.get(subtask.getId());
+
+            subtask.setEpicId(oldSubtask.getEpicId());
+
             Epic epic = epics.get(subtask.getEpicId());
             if (epic == null) {
                 return;
             }
-
-            Subtask oldSubtask = subtasks.get(subtask.getId());
 
             prioritizedTasks.remove(oldSubtask);
 
