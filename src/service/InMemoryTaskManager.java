@@ -272,6 +272,9 @@ public class InMemoryTaskManager implements service.TaskManager {
             Epic oldEpic = epics.get(epic.getId());
             epic.setSubtaskIds(oldEpic.getSubtaskIds());
             epic.setStatus(oldEpic.getStatus());
+            epic.setEpicDuration(oldEpic.getDuration());
+            epic.setEpicStartTime(oldEpic.getStartTime());
+            epic.setEpicEndTime(oldEpic.getEndTime());
 
             epics.put(epic.getId(), epic);
         }
