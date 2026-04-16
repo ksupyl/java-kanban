@@ -473,4 +473,67 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(Status.DONE, savedEpic.getStatus(), "Статус эпика должен пересчитаться.");
         assertEquals(Duration.ofMinutes(40), savedEpic.getDuration(), "Продолжительность эпика должна пересчитаться.");
     }
+
+    // // Проверка удаления задач, подзадач и эпиков
+    @Test
+    void shouldDeleteTaskById() {
+        Task task = taskManager.createTask(new Task(
+                "Task",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2026, 4, 16, 10, 0)
+        ));
+
+        taskManager.getTask(task.getId());
+        taskManager.deleteTask(task.getId());
+
+        assertNull(taskManager.getTask(task.getId()), "Задача должна быть удалена.");
+        assertTrue(taskManager.getTasks().isEmpty(), "Список задач должен быть пустым.");
+        assertTrue(taskManager.getHistory().isEmpty(), "История должна очищаться от удалённой задачи.");
+    }
+
+    @Test
+    void shouldDeleteSubtaskAndUpdateEpic() {
+        Epic epic = taskManager.createEpic(new Epic("Epic", "Description"));
+
+        Subtask subtask = taskManager.createSubtask(new Subtask(
+                "Subtask",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(20),
+                LocalDateTime.of(2026, 4, 16, 10, 0),
+                epic.getId()
+        ));
+
+        taskManager.deleteSubtask(subtask.getId());
+
+        Epic savedEpic = taskManager.getEpic(epic.getId());
+
+        assertNull(taskManager.getSubtask(subtask.getId()), "Подзадача должна быть удалена.");
+        assertTrue(savedEpic.getSubtaskIds().isEmpty(), "У эпика не должно остаться подзадач.");
+        assertEquals(Status.NEW, savedEpic.getStatus(), "Статус эпика должен пересчитаться.");
+        assertNull(savedEpic.getDuration(), "Продолжительность эпика должна стать null.");
+    }
+
+    @Test
+    void shouldDeleteEpicWithItsSubtasks() {
+        Epic epic = taskManager.createEpic(new Epic("Epic", "Description"));
+
+        Subtask subtask = taskManager.createSubtask(new Subtask(
+                "Subtask",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(20),
+                LocalDateTime.of(2026, 4, 16, 10, 0),
+                epic.getId()
+        ));
+
+        taskManager.deleteEpic(epic.getId());
+
+        assertNull(taskManager.getEpic(epic.getId()), "Эпик должен быть удалён.");
+        assertNull(taskManager.getSubtask(subtask.getId()), "Подзадача эпика тоже должна быть удалена.");
+        assertTrue(taskManager.getEpics().isEmpty(), "Список эпиков должен быть пустым.");
+        assertTrue(taskManager.getSubtasks().isEmpty(), "Список подзадач должен быть пустым.");
+    }
 }
