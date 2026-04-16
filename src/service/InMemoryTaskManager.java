@@ -344,6 +344,11 @@ public class InMemoryTaskManager implements service.TaskManager {
     @Override
     public void updateSubtask(Subtask subtask) {
         if (subtasks.containsKey(subtask.getId())) {
+            Epic epic = epics.get(subtask.getEpicId());
+            if (epic == null) {
+                return;
+            }
+
             Subtask oldSubtask = subtasks.get(subtask.getId());
 
             prioritizedTasks.remove(oldSubtask);
@@ -356,12 +361,8 @@ public class InMemoryTaskManager implements service.TaskManager {
             subtasks.put(subtask.getId(), subtask);
             addTaskToPrioritizedTasks(subtask);
 
-            // Пересчёт статуса эпика после обновления подзадачи
-            Epic epic = epics.get(subtask.getEpicId());
-            if (epic != null) {
-                updateEpicStatus(epic);
-                updateEpicTime(epic);
-            }
+            updateEpicStatus(epic);
+            updateEpicTime(epic);
         }
     }
 
