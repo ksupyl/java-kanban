@@ -305,4 +305,75 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(LocalDateTime.of(2026, 4, 16, 12, 30), savedEpic.getEndTime(),
                 "Время окончания эпика должно быть временем окончания самой поздней подзадачи.");
     }
+
+    // Проверка очистки всех задач
+    @Test
+    void shouldClearAllTasks() {
+        Task task = taskManager.createTask(new Task(
+                "Task",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2026, 4, 16, 10, 0)
+        ));
+
+        taskManager.getTask(task.getId());
+        taskManager.clearTasks();
+
+        assertTrue(taskManager.getTasks().isEmpty(), "Список задач должен быть пустым.");
+        assertNull(taskManager.getTask(task.getId()), "Задача не должна находиться после очистки.");
+        assertTrue(taskManager.getHistory().isEmpty(), "История должна очищаться от удалённых задач.");
+        assertTrue(taskManager.getPrioritizedTasks().isEmpty(), "Приоритетный список должен очищаться.");
+    }
+
+    // Проверка очистки всех подзадач и сброса полей эпика
+    @Test
+    void shouldClearAllSubtasksAndResetEpicFields() {
+        Epic epic = taskManager.createEpic(new Epic("Epic", "Description"));
+
+        taskManager.createSubtask(new Subtask(
+                "Subtask",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2026, 4, 16, 10, 0),
+                epic.getId()
+        ));
+
+        taskManager.clearSubtasks();
+
+        Epic savedEpic = taskManager.getEpic(epic.getId());
+
+        assertTrue(taskManager.getSubtasks().isEmpty(), "Список подзадач должен быть пустым.");
+        assertTrue(savedEpic.getSubtaskIds().isEmpty(), "У эпика не должно остаться подзадач.");
+        assertEquals(Status.NEW, savedEpic.getStatus(), "Статус эпика должен стать NEW.");
+        assertNull(savedEpic.getStartTime(), "Время начала эпика должно стать null.");
+        assertNull(savedEpic.getEndTime(), "Время окончания эпика должно стать null.");
+        assertNull(savedEpic.getDuration(), "Продолжительность эпика должна стать null.");
+    }
+
+    // Проверка очистки всех эпиков и связанных подзадач
+    @Test
+    void shouldClearAllEpicsAndSubtasks() {
+        Epic epic = taskManager.createEpic(new Epic("Epic", "Description"));
+        Subtask subtask = taskManager.createSubtask(new Subtask(
+                "Subtask",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(20),
+                LocalDateTime.of(2026, 4, 16, 11, 0),
+                epic.getId()
+        ));
+
+        taskManager.getEpic(epic.getId());
+        taskManager.getSubtask(subtask.getId());
+
+        taskManager.clearEpics();
+
+        assertTrue(taskManager.getEpics().isEmpty(), "Список эпиков должен быть пустым.");
+        assertTrue(taskManager.getSubtasks().isEmpty(), "Список подзадач должен быть пустым.");
+        assertNull(taskManager.getEpic(epic.getId()), "Эпик не должен находиться после очистки.");
+        assertNull(taskManager.getSubtask(subtask.getId()), "Подзадача не должна находиться после очистки.");
+        assertTrue(taskManager.getHistory().isEmpty(), "История должна очищаться.");
+    }
 }
