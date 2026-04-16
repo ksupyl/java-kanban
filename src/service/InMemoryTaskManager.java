@@ -171,6 +171,27 @@ public class InMemoryTaskManager implements service.TaskManager {
         return new ArrayList<>(prioritizedTasks);
     }
 
+    // Проверка пересечения двух задач по времени выполнения
+    protected boolean isTaskOverlapping(Task firstTask, Task secondTask) {
+        if (firstTask.getStartTime() == null || secondTask.getStartTime() == null) {
+            return false;
+        }
+
+        if (firstTask.getEndTime() == null || secondTask.getEndTime() == null) {
+            return false;
+        }
+
+        return firstTask.getStartTime().isBefore(secondTask.getEndTime())
+                && secondTask.getStartTime().isBefore(firstTask.getEndTime());
+    }
+
+    // Проверка пересечения задачи с уже существующими задачами и подзадачами
+    protected boolean hasTimeOverlap(Task task) {
+        return prioritizedTasks.stream()
+                .anyMatch(prioritizedTask -> prioritizedTask.getId() != task.getId()
+                        && isTaskOverlapping(task, prioritizedTask));
+    }
+
     // Добавление задачи или подзадачи в список приоритетов, если задано время начала
     protected void addTaskToPrioritizedTasks(Task task) {
         if (task.getStartTime() != null) {
@@ -181,6 +202,10 @@ public class InMemoryTaskManager implements service.TaskManager {
     // Создание задач, эпиков и подзадач
     @Override
     public Task createTask(Task task) {
+        if (hasTimeOverlap(task)) {
+            throw new IllegalArgumentException("Задача пересекается по времени с другой задачей.");
+        }
+
         task.setId(getNextId());
         task.setStatus(Status.NEW);
         tasks.put(task.getId(), task);
@@ -199,12 +224,16 @@ public class InMemoryTaskManager implements service.TaskManager {
 
     @Override
     public Subtask createSubtask(Subtask subtask) {
+        if (hasTimeOverlap(subtask)) {
+            throw new IllegalArgumentException("Подзадача пересекается по времени с другой задачей.");
+        }
+
         subtask.setId(getNextId());
         subtask.setStatus(Status.NEW);
         subtasks.put(subtask.getId(), subtask);
         addTaskToPrioritizedTasks(subtask);
 
-        // Добавляем в Эпик ID новой Подзадачи
+        // Добавляем в эпик id новой подзадачи
         Epic epic = epics.get(subtask.getEpicId());
         if (epic != null) {
             epic.addSubtaskId(subtask.getId());
@@ -221,6 +250,12 @@ public class InMemoryTaskManager implements service.TaskManager {
             Task oldTask = tasks.get(task.getId());
 
             prioritizedTasks.remove(oldTask);
+
+            if (hasTimeOverlap(task)) {
+                addTaskToPrioritizedTasks(oldTask);
+                throw new IllegalArgumentException("Обновлённая задача пересекается по времени с другой задачей.");
+            }
+
             tasks.put(task.getId(), task);
             addTaskToPrioritizedTasks(task);
         }
@@ -272,6 +307,12 @@ public class InMemoryTaskManager implements service.TaskManager {
             Subtask oldSubtask = subtasks.get(subtask.getId());
 
             prioritizedTasks.remove(oldSubtask);
+
+            if (hasTimeOverlap(subtask)) {
+                addTaskToPrioritizedTasks(oldSubtask);
+                throw new IllegalArgumentException("Обновлённая подзадача пересекается по времени с другой задачей.");
+            }
+
             subtasks.put(subtask.getId(), subtask);
             addTaskToPrioritizedTasks(subtask);
 
@@ -283,7 +324,7 @@ public class InMemoryTaskManager implements service.TaskManager {
         }
     }
 
-    // Удаление по идентификатору для каждого из типов задач(Задача/Эпик/Подзадача)
+    // Удаление задачи, эпика или подзадачи по идентификатору
     @Override
     public void deleteTask(int id) {
         Task removedTask = tasks.remove(id);
