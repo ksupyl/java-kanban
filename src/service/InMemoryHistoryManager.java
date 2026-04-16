@@ -25,6 +25,8 @@ public class InMemoryHistoryManager implements HistoryManager {
                     original.getName(),
                     original.getDescription(),
                     original.getStatus(),
+                    original.getDuration(),
+                    original.getStartTime(),
                     original.getEpicId()
             );
             copy.setId(original.getId());
@@ -35,9 +37,18 @@ public class InMemoryHistoryManager implements HistoryManager {
             copy.setId(original.getId());
             copy.setStatus(original.getStatus());
             copy.setSubtaskIds(original.getSubtaskIds());
+            copy.setEpicDuration(original.getDuration());
+            copy.setEpicStartTime(original.getStartTime());
+            copy.setEpicEndTime(original.getEndTime());
             return copy;
         } else {
-            Task copy = new Task(task.getName(), task.getDescription(), task.getStatus());
+            Task copy = new Task(
+                    task.getName(),
+                    task.getDescription(),
+                    task.getStatus(),
+                    task.getDuration(),
+                    task.getStartTime()
+            );
             copy.setId(task.getId());
             return copy;
         }
