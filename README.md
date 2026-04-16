@@ -1,2 +1,6 @@
 # java-kanban
-Repository for homework project.
+
+Проект - Трекер задач.
+
+## Автор
+Ксения

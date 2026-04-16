@@ -191,7 +191,7 @@ public class InMemoryTaskManager implements service.TaskManager {
     }
 
     // Метод для обновления статуса Эпик при обновлении Подзадач
-    private void updateEpicStatus(Epic epic) {
+    protected void updateEpicStatus(Epic epic) {
         if (epic.getSubtaskIds().isEmpty()) {
             epic.setStatus(Status.NEW);
             return;
@@ -275,5 +275,31 @@ public class InMemoryTaskManager implements service.TaskManager {
             }
         }
         return result;
+    }
+
+    // Служебные методы для восстановления менеджера из файла
+    protected void putLoadedTask(Task task) {
+        tasks.put(task.getId(), task);
+    }
+
+    protected void putLoadedEpic(Epic epic) {
+        epics.put(epic.getId(), epic);
+    }
+
+    protected void putLoadedSubtask(Subtask subtask) {
+        subtasks.put(subtask.getId(), subtask);
+
+        Epic epic = epics.get(subtask.getEpicId());
+        if (epic != null) {
+            epic.addSubtaskId(subtask.getId());
+        }
+    }
+
+    protected void setNextId(int nextId) {
+        this.nextId = nextId;
+    }
+
+    protected ArrayList<Epic> getLoadedEpics() {
+        return new ArrayList<>(epics.values());
     }
 }
