@@ -87,11 +87,19 @@ public class InMemoryTaskManager implements service.TaskManager {
     @Override
     public Task getTask(int id) {
         Task task = tasks.get(id);
-        if (task == null) return null;
+        if (task == null) {
+            return null;
+        }
 
         historyManager.add(task);
 
-        Task copy = new Task(task.getName(), task.getDescription(), task.getStatus());
+        Task copy = new Task(
+                task.getName(),
+                task.getDescription(),
+                task.getStatus(),
+                task.getDuration(),
+                task.getStartTime()
+        );
         copy.setId(task.getId());
 
         return copy;
@@ -100,7 +108,9 @@ public class InMemoryTaskManager implements service.TaskManager {
     @Override
     public Epic getEpic(int id) {
         Epic epic = epics.get(id);
-        if (epic == null) return null;
+        if (epic == null) {
+            return null;
+        }
 
         historyManager.add(epic);
 
@@ -108,6 +118,9 @@ public class InMemoryTaskManager implements service.TaskManager {
         copy.setId(epic.getId());
         copy.setStatus(epic.getStatus());
         copy.setSubtaskIds(epic.getSubtaskIds());
+        copy.setEpicDuration(epic.getDuration());
+        copy.setEpicStartTime(epic.getStartTime());
+        copy.setEpicEndTime(epic.getEndTime());
 
         return copy;
     }
@@ -115,7 +128,9 @@ public class InMemoryTaskManager implements service.TaskManager {
     @Override
     public Subtask getSubtask(int id) {
         Subtask subtask = subtasks.get(id);
-        if (subtask == null) return null;
+        if (subtask == null) {
+            return null;
+        }
 
         historyManager.add(subtask);
 
@@ -123,6 +138,8 @@ public class InMemoryTaskManager implements service.TaskManager {
                 subtask.getName(),
                 subtask.getDescription(),
                 subtask.getStatus(),
+                subtask.getDuration(),
+                subtask.getStartTime(),
                 subtask.getEpicId()
         );
         copy.setId(subtask.getId());
