@@ -376,4 +376,101 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertNull(taskManager.getSubtask(subtask.getId()), "Подзадача не должна находиться после очистки.");
         assertTrue(taskManager.getHistory().isEmpty(), "История должна очищаться.");
     }
+
+    // Проверка обновления задач, подзадач и эпиков
+    @Test
+    void shouldUpdateTask() {
+        Task task = taskManager.createTask(new Task(
+                "Old name",
+                "Old description",
+                Status.NEW,
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2026, 4, 16, 10, 0)
+        ));
+
+        Task updatedTask = new Task(
+                "New name",
+                "New description",
+                Status.IN_PROGRESS,
+                Duration.ofMinutes(45),
+                LocalDateTime.of(2026, 4, 16, 12, 0)
+        );
+        updatedTask.setId(task.getId());
+
+        taskManager.updateTask(updatedTask);
+
+        Task savedTask = taskManager.getTask(task.getId());
+
+        assertEquals("New name", savedTask.getName());
+        assertEquals("New description", savedTask.getDescription());
+        assertEquals(Status.IN_PROGRESS, savedTask.getStatus());
+        assertEquals(Duration.ofMinutes(45), savedTask.getDuration());
+        assertEquals(LocalDateTime.of(2026, 4, 16, 12, 0), savedTask.getStartTime());
+    }
+
+    @Test
+    void shouldUpdateEpicWithoutLosingCalculatedFields() {
+        Epic epic = taskManager.createEpic(new Epic("Old epic", "Old description"));
+
+        taskManager.createSubtask(new Subtask(
+                "Subtask",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2026, 4, 16, 10, 0),
+                epic.getId()
+        ));
+
+        Epic updatedEpic = new Epic("New epic", "New description");
+        updatedEpic.setId(epic.getId());
+
+        taskManager.updateEpic(updatedEpic);
+
+        Epic savedEpic = taskManager.getEpic(epic.getId());
+
+        assertEquals("New epic", savedEpic.getName());
+        assertEquals("New description", savedEpic.getDescription());
+        assertEquals(1, savedEpic.getSubtaskIds().size(), "Связь с подзадачами должна сохраниться.");
+        assertEquals(Status.NEW, savedEpic.getStatus(), "Статус не должен теряться.");
+        assertEquals(Duration.ofMinutes(30), savedEpic.getDuration(), "Продолжительность не должна теряться.");
+        assertEquals(LocalDateTime.of(2026, 4, 16, 10, 0), savedEpic.getStartTime(), "StartTime не должен теряться.");
+        assertEquals(LocalDateTime.of(2026, 4, 16, 10, 30), savedEpic.getEndTime(), "EndTime не должен теряться.");
+    }
+
+    @Test
+    void shouldUpdateSubtaskAndRecalculateEpic() {
+        Epic epic = taskManager.createEpic(new Epic("Epic", "Description"));
+
+        Subtask subtask = taskManager.createSubtask(new Subtask(
+                "Old subtask",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(20),
+                LocalDateTime.of(2026, 4, 16, 9, 0),
+                epic.getId()
+        ));
+
+        Subtask updatedSubtask = new Subtask(
+                "New subtask",
+                "New description",
+                Status.DONE,
+                Duration.ofMinutes(40),
+                LocalDateTime.of(2026, 4, 16, 11, 0),
+                epic.getId()
+        );
+        updatedSubtask.setId(subtask.getId());
+
+        taskManager.updateSubtask(updatedSubtask);
+
+        Subtask savedSubtask = taskManager.getSubtask(subtask.getId());
+        Epic savedEpic = taskManager.getEpic(epic.getId());
+
+        assertEquals("New subtask", savedSubtask.getName());
+        assertEquals(Status.DONE, savedSubtask.getStatus());
+        assertEquals(Duration.ofMinutes(40), savedSubtask.getDuration());
+        assertEquals(LocalDateTime.of(2026, 4, 16, 11, 0), savedSubtask.getStartTime());
+
+        assertEquals(Status.DONE, savedEpic.getStatus(), "Статус эпика должен пересчитаться.");
+        assertEquals(Duration.ofMinutes(40), savedEpic.getDuration(), "Продолжительность эпика должна пересчитаться.");
+    }
 }
