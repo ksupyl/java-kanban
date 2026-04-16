@@ -536,4 +536,20 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getEpics().isEmpty(), "Список эпиков должен быть пустым.");
         assertTrue(taskManager.getSubtasks().isEmpty(), "Список подзадач должен быть пустым.");
     }
+
+    // Проверка граничных случаев поиска задач, эпиков и подзадач
+    @Test
+    void shouldReturnNullWhenTaskNotFound() {
+        assertNull(taskManager.getTask(999), "Несуществующая задача должна возвращать null.");
+    }
+
+    @Test
+    void shouldReturnNullWhenEpicNotFound() {
+        assertNull(taskManager.getEpic(999), "Несуществующий эпик должен возвращать null.");
+    }
+
+    @Test
+    void shouldReturnNullWhenSubtaskNotFound() {
+        assertNull(taskManager.getSubtask(999), "Несуществующая подзадача должна возвращать null.");
+    }
 }
