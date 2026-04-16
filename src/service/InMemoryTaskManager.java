@@ -419,6 +419,7 @@ public class InMemoryTaskManager implements service.TaskManager {
 
         return epic.getSubtaskIds().stream()
                 .map(subtasks::get)
+                .filter(subtask -> subtask != null)
                 .toList();
     }
 
