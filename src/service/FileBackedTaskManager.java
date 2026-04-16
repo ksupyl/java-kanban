@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.TreeMap;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -24,7 +26,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     // Сохраняет текущее состояние менеджера в CSV-файл
     private void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write("id,type,name,status,description,epic");
+            writer.write("id,type,name,status,description,duration,startTime,epic");
             writer.newLine();
 
             TreeMap<Integer, Task> allTasks = new TreeMap<>();
@@ -50,18 +52,27 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    // Преобразует задачу в строку формата CSV
+    // Преобразует задачу в строку формата CSV с учетом времени и продолжительности
     private String toString(Task task) {
         StringBuilder builder = new StringBuilder();
 
         builder.append(task.getId()).append(",");
         builder.append(task.getType()).append(",");
-
         builder.append(task.getName()).append(",");
         builder.append(task.getStatus()).append(",");
         builder.append(task.getDescription()).append(",");
 
-        if (task instanceof Subtask) {
+        if (task.getDuration() != null) {
+            builder.append(task.getDuration().toMinutes());
+        }
+        builder.append(",");
+
+        if (task.getStartTime() != null) {
+            builder.append(task.getStartTime());
+        }
+        builder.append(",");
+
+        if (task.getType() == TaskType.SUBTASK) {
             Subtask subtask = (Subtask) task;
             builder.append(subtask.getEpicId());
         }
@@ -69,7 +80,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return builder.toString();
     }
 
-    // Преобразует строку CSV в объект задачи
+    // Преобразует строку CSV в объект задачи с учетом времени и продолжительности
     private static Task fromString(String value) {
         String[] fields = value.split(",", -1);
 
@@ -79,16 +90,26 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Status status = Status.valueOf(fields[3]);
         String description = fields[4];
 
+        Duration duration = null;
+        if (!fields[5].isBlank()) {
+            duration = Duration.ofMinutes(Long.parseLong(fields[5]));
+        }
+
+        LocalDateTime startTime = null;
+        if (!fields[6].isBlank()) {
+            startTime = LocalDateTime.parse(fields[6]);
+        }
+
         Task task;
 
         if (taskType == TaskType.TASK) {
-            task = new Task(name, description, status);
+            task = new Task(name, description, status, duration, startTime);
         } else if (taskType == TaskType.EPIC) {
             task = new Epic(name, description);
             task.setStatus(status);
         } else {
-            int epicId = Integer.parseInt(fields[5]);
-            task = new Subtask(name, description, status, epicId);
+            int epicId = Integer.parseInt(fields[7]);
+            task = new Subtask(name, description, status, duration, startTime, epicId);
         }
 
         task.setId(id);
