@@ -552,4 +552,42 @@ abstract class TaskManagerTest<T extends TaskManager> {
     void shouldReturnNullWhenSubtaskNotFound() {
         assertNull(taskManager.getSubtask(999), "Несуществующая подзадача должна возвращать null.");
     }
+
+    // Проверка добавления задач в историю просмотров
+    @Test
+    void shouldAddViewedTaskToHistory() {
+        Task task = taskManager.createTask(new Task(
+                "Task",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(15),
+                LocalDateTime.of(2026, 4, 16, 8, 0)
+        ));
+
+        taskManager.getTask(task.getId());
+
+        List<Task> history = taskManager.getHistory();
+
+        assertEquals(1, history.size(), "После просмотра задача должна попасть в историю.");
+        assertEquals(task.getId(), history.get(0).getId(), "В истории должна быть просмотренная задача.");
+    }
+
+    // Проверка создания подзадачи без существующего эпика
+    @Test
+    void shouldNotCreateSubtaskWithoutExistingEpic() {
+        Subtask subtask = new Subtask(
+                "Subtask",
+                "Description",
+                Status.NEW,
+                Duration.ofMinutes(20),
+                LocalDateTime.of(2026, 4, 16, 10, 0),
+                999
+        );
+
+        Subtask createdSubtask = taskManager.createSubtask(subtask);
+
+        assertNull(createdSubtask, "Подзадача не должна создаваться без существующего эпика.");
+        assertTrue(taskManager.getSubtasks().isEmpty(), "Список подзадач должен остаться пустым.");
+    }
+
 }
