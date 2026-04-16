@@ -304,7 +304,6 @@ public class InMemoryTaskManager implements service.TaskManager {
     }
 
     // Пересчёт времени эпика на основе его подзадач
-    // Пересчёт времени эпика на основе его подзадач
     protected void updateEpicTime(Epic epic) {
         if (epic.getSubtaskIds().isEmpty()) {
             epic.setEpicDuration(null);
