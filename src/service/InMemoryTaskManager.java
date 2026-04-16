@@ -284,17 +284,15 @@ public class InMemoryTaskManager implements service.TaskManager {
             return;
         }
 
-        int countNew = 0;
-        int countDone = 0;
+        long countNew = epic.getSubtaskIds().stream()
+                .map(subtasks::get)
+                .filter(subtask -> subtask.getStatus() == Status.NEW)
+                .count();
 
-        for (int subtaskId : epic.getSubtaskIds()) {
-            Subtask subtask = subtasks.get(subtaskId);
-            if (subtask.getStatus() == Status.NEW) {
-                countNew++;
-            } else if (subtask.getStatus() == Status.DONE) {
-                countDone++;
-            }
-        }
+        long countDone = epic.getSubtaskIds().stream()
+                .map(subtasks::get)
+                .filter(subtask -> subtask.getStatus() == Status.DONE)
+                .count();
 
         if (countNew == epic.getSubtaskIds().size()) {
             epic.setStatus(Status.NEW);
@@ -306,6 +304,7 @@ public class InMemoryTaskManager implements service.TaskManager {
     }
 
     // Пересчёт времени эпика на основе его подзадач
+    // Пересчёт времени эпика на основе его подзадач
     protected void updateEpicTime(Epic epic) {
         if (epic.getSubtaskIds().isEmpty()) {
             epic.setEpicDuration(null);
@@ -314,32 +313,25 @@ public class InMemoryTaskManager implements service.TaskManager {
             return;
         }
 
-        long totalDurationInMinutes = 0;
-        LocalDateTime earliestStartTime = null;
-        LocalDateTime latestEndTime = null;
+        long totalDurationInMinutes = epic.getSubtaskIds().stream()
+                .map(subtasks::get)
+                .filter(subtask -> subtask.getDuration() != null)
+                .mapToLong(subtask -> subtask.getDuration().toMinutes())
+                .sum();
 
-        for (int subtaskId : epic.getSubtaskIds()) {
-            Subtask subtask = subtasks.get(subtaskId);
-            if (subtask == null) {
-                continue;
-            }
+        LocalDateTime earliestStartTime = epic.getSubtaskIds().stream()
+                .map(subtasks::get)
+                .map(Subtask::getStartTime)
+                .filter(start -> start != null)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
 
-            if (subtask.getDuration() != null) {
-                totalDurationInMinutes += subtask.getDuration().toMinutes();
-            }
-
-            if (subtask.getStartTime() != null) {
-                if (earliestStartTime == null || subtask.getStartTime().isBefore(earliestStartTime)) {
-                    earliestStartTime = subtask.getStartTime();
-                }
-            }
-
-            if (subtask.getEndTime() != null) {
-                if (latestEndTime == null || subtask.getEndTime().isAfter(latestEndTime)) {
-                    latestEndTime = subtask.getEndTime();
-                }
-            }
-        }
+        LocalDateTime latestEndTime = epic.getSubtaskIds().stream()
+                .map(subtasks::get)
+                .map(Subtask::getEndTime)
+                .filter(end -> end != null)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
 
         epic.setEpicDuration(Duration.ofMinutes(totalDurationInMinutes));
         epic.setEpicStartTime(earliestStartTime);
@@ -413,16 +405,18 @@ public class InMemoryTaskManager implements service.TaskManager {
         historyManager.remove(id);
     }
 
-    // Получение списка подзадач определённого эпика
+    // Получение списка подзадач эпика с использованием Stream API
+    @Override
     public List<Subtask> getEpicSubtasks(int epicId) {
-        ArrayList<Subtask> result = new ArrayList<>();
         Epic epic = epics.get(epicId);
-        if (epic != null) {
-            for (int subtaskId : epic.getSubtaskIds()) {
-                result.add(subtasks.get(subtaskId));
-            }
+
+        if (epic == null) {
+            return new ArrayList<>();
         }
-        return result;
+
+        return epic.getSubtaskIds().stream()
+                .map(subtasks::get)
+                .toList();
     }
 
     // Служебные методы для восстановления менеджера из файла
