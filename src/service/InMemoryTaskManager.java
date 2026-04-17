@@ -176,23 +176,21 @@ public class InMemoryTaskManager implements service.TaskManager {
 
     // Проверка пересечения двух задач по времени выполнения
     protected boolean isTaskOverlapping(Task firstTask, Task secondTask) {
-        if (firstTask.getStartTime() == null || secondTask.getStartTime() == null) {
-            return false;
-        }
-
-        if (firstTask.getEndTime() == null || secondTask.getEndTime() == null) {
-            return false;
-        }
-
         return firstTask.getStartTime().isBefore(secondTask.getEndTime())
                 && secondTask.getStartTime().isBefore(firstTask.getEndTime());
     }
 
     // Проверка пересечения задачи с уже существующими задачами и подзадачами
     protected boolean hasTimeOverlap(Task task) {
+        if (task.getStartTime() == null || task.getEndTime() == null) {
+            return false;
+        }
+
         return prioritizedTasks.stream()
-                .anyMatch(prioritizedTask -> prioritizedTask.getId() != task.getId()
-                        && isTaskOverlapping(task, prioritizedTask));
+                .anyMatch(prioritizedTask ->
+                        prioritizedTask.getId() != task.getId()
+                                && isTaskOverlapping(task, prioritizedTask)
+                );
     }
 
     // Добавление задачи или подзадачи в список приоритетов, если задано время начала
