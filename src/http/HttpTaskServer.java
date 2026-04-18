@@ -3,6 +3,8 @@ package http;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpServer;
+import http.adapter.DurationAdapter;
+import http.adapter.LocalDateTimeAdapter;
 import http.handler.EpicsHandler;
 import http.handler.HistoryHandler;
 import http.handler.PrioritizedHandler;
@@ -13,6 +15,8 @@ import service.TaskManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class HttpTaskServer {
 
@@ -26,7 +30,10 @@ public class HttpTaskServer {
     private final TaskManager taskManager;
 
     // Gson нужен для преобразования объектов Java в JSON и обратно
-    private static final Gson GSON = new GsonBuilder().create();
+    private static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(Duration.class, new DurationAdapter())
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .create();
 
     // Конструктор для обычного запуска приложения и для тестов
     public HttpTaskServer(TaskManager taskManager) throws IOException {
@@ -53,7 +60,7 @@ public class HttpTaskServer {
         System.out.println("HTTP task server stopped on port " + PORT);
     }
 
-    // Возвращает экземпляр Gson для работы с JSON
+    // Общий Gson для всего HTTP-слоя
     public static Gson getGson() {
         return GSON;
     }
@@ -64,4 +71,6 @@ public class HttpTaskServer {
         HttpTaskServer httpTaskServer = new HttpTaskServer(manager);
         httpTaskServer.start();
     }
+
+
 }
