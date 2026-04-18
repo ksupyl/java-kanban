@@ -69,6 +69,87 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
         assertEquals("Помыть окна", subtasksFromManager.get(0).getName(), "Некорректное имя подзадачи.");
     }
 
+    // Проверка: POST /subtasks должен обновлять подзадачу,
+    // если в JSON указан существующий id.
+    @Test
+    public void shouldUpdateSubtask() throws IOException, InterruptedException {
+        Epic epic = createTestEpic("Учёба", "Подготовка к занятиям");
+        manager.createEpic(epic);
+
+        int epicId = manager.getEpics().get(0).getId();
+
+        Subtask subtask = createTestSubtask(
+                "Сделать домашку",
+                "Первая версия",
+                60,
+                LocalDateTime.of(2026, 4, 25, 16, 0),
+                epicId
+        );
+        manager.createSubtask(subtask);
+
+        Subtask savedSubtask = manager.getSubtasks().get(0);
+
+        Subtask updatedSubtask = createTestSubtask(
+                "Сделать домашку по Java",
+                "Обновлённая версия",
+                90,
+                LocalDateTime.of(2026, 4, 25, 18, 0),
+                epicId
+        );
+        updatedSubtask.setId(savedSubtask.getId());
+
+        String updatedSubtaskJson = gson.toJson(updatedSubtask);
+
+        URI url = URI.create("http://localhost:8080/subtasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(updatedSubtaskJson))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        Subtask subtaskFromManager = manager.getSubtask(savedSubtask.getId());
+
+        assertEquals(201, response.statusCode(), "Некорректный код ответа при обновлении подзадачи.");
+        assertEquals("Сделать домашку по Java", subtaskFromManager.getName(), "Имя подзадачи не обновилось.");
+        assertEquals("Обновлённая версия", subtaskFromManager.getDescription(),
+                "Описание подзадачи не обновилось.");
+    }
+
+    // Проверка: POST /subtasks должен возвращать 404,
+    // если в JSON указан id несуществующей подзадачи.
+    @Test
+    public void shouldReturn404WhenUpdatingMissingSubtask() throws IOException, InterruptedException {
+        Epic epic = createTestEpic("Работа", "Рабочий эпик");
+        manager.createEpic(epic);
+
+        int epicId = manager.getEpics().get(0).getId();
+
+        Subtask subtask = createTestSubtask(
+                "Несуществующая подзадача",
+                "Не должна обновиться",
+                40,
+                LocalDateTime.of(2026, 4, 26, 11, 0),
+                epicId
+        );
+        subtask.setId(999);
+
+        String subtaskJson = gson.toJson(subtask);
+
+        URI url = URI.create("http://localhost:8080/subtasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(subtaskJson))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(404, response.statusCode(),
+                "Должен вернуться статус 404 при попытке обновить несуществующую подзадачу.");
+    }
+
     // Проверка: GET /subtasks/{id} должен возвращать подзадачу по id.
     @Test
     public void shouldReturnSubtaskById() throws IOException, InterruptedException {
@@ -217,5 +298,21 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
 
         assertEquals(200, response.statusCode(), "Некорректный код ответа при удалении подзадачи.");
         assertTrue(manager.getSubtasks().isEmpty(), "Подзадача не была удалена из менеджера.");
+    }
+
+    // Проверка: DELETE /subtasks/{id} должен возвращать 404,
+    // если подзадачи с таким id не существует.
+    @Test
+    public void shouldReturn404WhenDeletingMissingSubtask() throws IOException, InterruptedException {
+        URI url = URI.create("http://localhost:8080/subtasks/999");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(404, response.statusCode(),
+                "Должен вернуться статус 404 при удалении несуществующей подзадачи.");
     }
 }

@@ -143,6 +143,32 @@ public class HttpTaskManagerTasksTest extends HttpTaskServerTestBase {
                 "Описание задачи не обновилось.");
     }
 
+    // Проверка: POST /tasks должен возвращать 404,
+    // если в JSON указан id несуществующей задачи.
+    @Test
+    public void shouldReturn404WhenUpdatingMissingTask() throws IOException, InterruptedException {
+        Task task = createTestTask(
+                "Несуществующая задача",
+                "Не должна обновиться",
+                20,
+                LocalDateTime.of(2026, 4, 20, 15, 0)
+        );
+        task.setId(999);
+
+        String taskJson = gson.toJson(task);
+
+        URI url = URI.create("http://localhost:8080/tasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .POST(HttpRequest.BodyPublishers.ofString(taskJson))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(404, response.statusCode(),
+                "Должен вернуться статус 404 при попытке обновить несуществующую задачу.");
+    }
+
     // Проверка: POST /tasks должен возвращать 406,
     // если новая задача пересекается по времени с существующей.
     @Test

@@ -58,6 +58,58 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
         assertEquals("Покупки", epicsFromManager.get(0).getName(), "Некорректное имя эпика.");
     }
 
+    // Проверка: POST /epics должен обновлять эпик,
+    // если в JSON указан существующий id.
+    @Test
+    public void shouldUpdateEpic() throws IOException, InterruptedException {
+        Epic epic = createTestEpic("Учёба", "Старое описание");
+        manager.createEpic(epic);
+
+        Epic savedEpic = manager.getEpics().get(0);
+
+        Epic updatedEpic = createTestEpic("Учёба и практика", "Новое описание");
+        updatedEpic.setId(savedEpic.getId());
+
+        String updatedEpicJson = gson.toJson(updatedEpic);
+
+        URI url = URI.create("http://localhost:8080/epics");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(updatedEpicJson))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        Epic epicFromManager = manager.getEpic(savedEpic.getId());
+
+        assertEquals(201, response.statusCode(), "Некорректный код ответа при обновлении эпика.");
+        assertEquals("Учёба и практика", epicFromManager.getName(), "Имя эпика не обновилось.");
+        assertEquals("Новое описание", epicFromManager.getDescription(), "Описание эпика не обновилось.");
+    }
+
+    // Проверка: POST /epics должен возвращать 404,
+    // если в JSON указан id несуществующего эпика.
+    @Test
+    public void shouldReturn404WhenUpdatingMissingEpic() throws IOException, InterruptedException {
+        Epic epic = createTestEpic("Несуществующий эпик", "Не должен обновиться");
+        epic.setId(999);
+
+        String epicJson = gson.toJson(epic);
+
+        URI url = URI.create("http://localhost:8080/epics");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(epicJson))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(404, response.statusCode(),
+                "Должен вернуться статус 404 при попытке обновить несуществующий эпик.");
+    }
+
     // Проверка: GET /epics/{id} должен возвращать эпик по id.
     @Test
     public void shouldReturnEpicById() throws IOException, InterruptedException {
@@ -166,5 +218,21 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
 
         assertEquals(200, response.statusCode(), "Некорректный код ответа при удалении эпика.");
         assertTrue(manager.getEpics().isEmpty(), "Эпик не был удалён из менеджера.");
+    }
+
+    // Проверка: DELETE /epics/{id} должен возвращать 404,
+    // если эпика с таким id не существует.
+    @Test
+    public void shouldReturn404WhenDeletingMissingEpic() throws IOException, InterruptedException {
+        URI url = URI.create("http://localhost:8080/epics/999");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(url)
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(404, response.statusCode(),
+                "Должен вернуться статус 404 при удалении несуществующего эпика.");
     }
 }
