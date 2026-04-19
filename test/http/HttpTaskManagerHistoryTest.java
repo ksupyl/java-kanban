@@ -23,7 +23,7 @@ public class HttpTaskManagerHistoryTest extends HttpTaskServerTestBase {
     // если история просмотров пуста.
     @Test
     public void shouldReturnEmptyHistory() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/history");
+        URI url = createUri("/history");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -67,7 +67,7 @@ public class HttpTaskManagerHistoryTest extends HttpTaskServerTestBase {
         manager.getEpic(epicId);
         manager.getSubtask(subtaskId);
 
-        URI url = URI.create("http://localhost:8080/history");
+        URI url = createUri("/history");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -92,7 +92,7 @@ public class HttpTaskManagerHistoryTest extends HttpTaskServerTestBase {
     // Проверка: GET /history должен возвращать только GET-запросы.
     @Test
     public void shouldReturn500ForPostHistoryRequest() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/history");
+        URI url = createUri("/history");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .POST(HttpRequest.BodyPublishers.ofString(""))

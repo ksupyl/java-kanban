@@ -19,7 +19,7 @@ public class HttpTaskManagerTasksTest extends HttpTaskServerTestBase {
     // если задач в менеджере нет.
     @Test
     public void shouldReturnEmptyTasksList() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/tasks");
+        URI url = createUri("/tasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -43,7 +43,7 @@ public class HttpTaskManagerTasksTest extends HttpTaskServerTestBase {
 
         String taskJson = gson.toJson(task);
 
-        URI url = URI.create("http://localhost:8080/tasks");
+        URI url = createUri("/tasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .POST(HttpRequest.BodyPublishers.ofString(taskJson))
@@ -72,7 +72,7 @@ public class HttpTaskManagerTasksTest extends HttpTaskServerTestBase {
 
         int taskId = manager.getTasks().get(0).getId();
 
-        URI url = URI.create("http://localhost:8080/tasks/" + taskId);
+        URI url = createUri("/tasks/" + taskId);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -92,7 +92,7 @@ public class HttpTaskManagerTasksTest extends HttpTaskServerTestBase {
     // если задачи с таким id не существует.
     @Test
     public void shouldReturn404WhenTaskNotFound() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/tasks/999");
+        URI url = createUri("/tasks/" + MISSING_ID);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -127,7 +127,7 @@ public class HttpTaskManagerTasksTest extends HttpTaskServerTestBase {
 
         String updatedTaskJson = gson.toJson(updatedTask);
 
-        URI url = URI.create("http://localhost:8080/tasks");
+        URI url = createUri("/tasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .POST(HttpRequest.BodyPublishers.ofString(updatedTaskJson))
@@ -157,7 +157,7 @@ public class HttpTaskManagerTasksTest extends HttpTaskServerTestBase {
 
         String taskJson = gson.toJson(task);
 
-        URI url = URI.create("http://localhost:8080/tasks");
+        URI url = createUri("/tasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .POST(HttpRequest.BodyPublishers.ofString(taskJson))
@@ -190,7 +190,7 @@ public class HttpTaskManagerTasksTest extends HttpTaskServerTestBase {
 
         String secondTaskJson = gson.toJson(secondTask);
 
-        URI url = URI.create("http://localhost:8080/tasks");
+        URI url = createUri("/tasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .POST(HttpRequest.BodyPublishers.ofString(secondTaskJson))
@@ -216,7 +216,7 @@ public class HttpTaskManagerTasksTest extends HttpTaskServerTestBase {
 
         int taskId = manager.getTasks().get(0).getId();
 
-        URI url = URI.create("http://localhost:8080/tasks/" + taskId);
+        URI url = createUri("/tasks/" + taskId);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .DELETE()
@@ -232,7 +232,7 @@ public class HttpTaskManagerTasksTest extends HttpTaskServerTestBase {
     // если задачи с таким id не существует.
     @Test
     public void shouldReturn404WhenDeletingMissingTask() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/tasks/999");
+        URI url = createUri("/tasks/" + MISSING_ID);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .DELETE()

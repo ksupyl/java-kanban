@@ -21,7 +21,7 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
     // если подзадач в менеджере нет.
     @Test
     public void shouldReturnEmptySubtasksList() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = createUri("/subtasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -52,7 +52,7 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
 
         String subtaskJson = gson.toJson(subtask);
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = createUri("/subtasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .header("Content-Type", "application/json")
@@ -100,7 +100,7 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
 
         String updatedSubtaskJson = gson.toJson(updatedSubtask);
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = createUri("/subtasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .header("Content-Type", "application/json")
@@ -137,7 +137,7 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
 
         String subtaskJson = gson.toJson(subtask);
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = createUri("/subtasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .header("Content-Type", "application/json")
@@ -169,7 +169,7 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
 
         int subtaskId = manager.getSubtasks().get(0).getId();
 
-        URI url = URI.create("http://localhost:8080/subtasks/" + subtaskId);
+        URI url = createUri("/subtasks/" + subtaskId);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -189,7 +189,7 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
     // если подзадачи с таким id не существует.
     @Test
     public void shouldReturn404WhenSubtaskNotFound() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/subtasks/999");
+        URI url = createUri("/subtasks/" + MISSING_ID);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -214,7 +214,7 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
 
         String subtaskJson = gson.toJson(subtask);
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = createUri("/subtasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .header("Content-Type", "application/json")
@@ -255,7 +255,7 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
 
         String subtaskJson = gson.toJson(overlappingSubtask);
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = createUri("/subtasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .header("Content-Type", "application/json")
@@ -288,7 +288,7 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
 
         int subtaskId = manager.getSubtasks().get(0).getId();
 
-        URI url = URI.create("http://localhost:8080/subtasks/" + subtaskId);
+        URI url = createUri("/subtasks/" + subtaskId);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .DELETE()
@@ -304,7 +304,7 @@ public class HttpTaskManagerSubtasksTest extends HttpTaskServerTestBase {
     // если подзадачи с таким id не существует.
     @Test
     public void shouldReturn404WhenDeletingMissingSubtask() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/subtasks/999");
+        URI url = createUri("/subtasks/" + MISSING_ID);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .DELETE()

@@ -11,6 +11,7 @@ import service.InMemoryTaskManager;
 import service.TaskManager;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -32,6 +33,10 @@ public abstract class HttpTaskServerTestBase {
     // HTTP-клиент для отправки запросов к локальному серверу.
     protected HttpClient client;
 
+    // Общие константы для HTTP-тестов.
+    protected static final String BASE_URL = "http://localhost:8080";
+    protected static final int MISSING_ID = 999;
+
     // Запуск нового чистого окружения перед каждым тестом.
     @BeforeEach
     public void setUp() throws IOException {
@@ -47,6 +52,11 @@ public abstract class HttpTaskServerTestBase {
     @AfterEach
     public void shutDown() {
         taskServer.stop();
+    }
+
+    // Вспомогательный метод для создания URI к локальному тестовому серверу.
+    protected URI createUri(String path) {
+        return URI.create(BASE_URL + path);
     }
 
     // Вспомогательный метод для быстрого создания обычной задачи.

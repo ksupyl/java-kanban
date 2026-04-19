@@ -23,7 +23,7 @@ public class HttpTaskManagerPrioritizedTest extends HttpTaskServerTestBase {
     // если задач с временем начала нет.
     @Test
     public void shouldReturnEmptyPrioritizedList() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/prioritized");
+        URI url = createUri("/prioritized");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -68,7 +68,7 @@ public class HttpTaskManagerPrioritizedTest extends HttpTaskServerTestBase {
         );
         manager.createSubtask(middleSubtask);
 
-        URI url = URI.create("http://localhost:8080/prioritized");
+        URI url = createUri("/prioritized");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -96,7 +96,7 @@ public class HttpTaskManagerPrioritizedTest extends HttpTaskServerTestBase {
     // Проверка: GET /prioritized должен возвращать только GET-запросы.
     @Test
     public void shouldReturn500ForPostPrioritizedRequest() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/prioritized");
+        URI url = createUri("/prioritized");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .POST(HttpRequest.BodyPublishers.ofString(""))

@@ -23,7 +23,7 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
     // если эпиков в менеджере нет.
     @Test
     public void shouldReturnEmptyEpicsList() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/epics");
+        URI url = createUri("/epics");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -41,7 +41,7 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
         Epic epic = createTestEpic("Покупки", "Список покупок на вечер");
         String epicJson = gson.toJson(epic);
 
-        URI url = URI.create("http://localhost:8080/epics");
+        URI url = createUri("/epics");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .header("Content-Type", "application/json")
@@ -72,7 +72,7 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
 
         String updatedEpicJson = gson.toJson(updatedEpic);
 
-        URI url = URI.create("http://localhost:8080/epics");
+        URI url = createUri("/epics");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .header("Content-Type", "application/json")
@@ -97,7 +97,7 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
 
         String epicJson = gson.toJson(epic);
 
-        URI url = URI.create("http://localhost:8080/epics");
+        URI url = createUri("/epics");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .header("Content-Type", "application/json")
@@ -118,7 +118,7 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
 
         int epicId = manager.getEpics().get(0).getId();
 
-        URI url = URI.create("http://localhost:8080/epics/" + epicId);
+        URI url = createUri("/epics/" + epicId);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -138,7 +138,7 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
     // если эпика с таким id не существует.
     @Test
     public void shouldReturn404WhenEpicNotFound() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/epics/999");
+        URI url = createUri("/epics/" + MISSING_ID);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -166,7 +166,7 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
         );
         manager.createSubtask(subtask);
 
-        URI url = URI.create("http://localhost:8080/epics/" + epicId + "/subtasks");
+        URI url = createUri("/epics/" + epicId + "/subtasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -188,7 +188,7 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
     // если эпика с таким id не существует.
     @Test
     public void shouldReturn404WhenEpicSubtasksRequestedForMissingEpic() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/epics/999/subtasks");
+        URI url = createUri("/epics/" + MISSING_ID + "/subtasks");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .GET()
@@ -208,7 +208,7 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
 
         int epicId = manager.getEpics().get(0).getId();
 
-        URI url = URI.create("http://localhost:8080/epics/" + epicId);
+        URI url = createUri("/epics/" + epicId);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .DELETE()
@@ -224,7 +224,7 @@ public class HttpTaskManagerEpicsTest extends HttpTaskServerTestBase {
     // если эпика с таким id не существует.
     @Test
     public void shouldReturn404WhenDeletingMissingEpic() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/epics/999");
+        URI url = createUri("/epics/" + MISSING_ID);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .DELETE()
