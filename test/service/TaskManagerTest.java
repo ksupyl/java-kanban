@@ -6,6 +6,7 @@ import model.Subtask;
 import model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import service.exception.NotFoundException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -321,7 +322,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.clearTasks();
 
         assertTrue(taskManager.getTasks().isEmpty(), "Список задач должен быть пустым.");
-        assertNull(taskManager.getTask(task.getId()), "Задача не должна находиться после очистки.");
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getTask(task.getId()),
+                "После очистки задача должна выбрасывать NotFoundException."
+        );
         assertTrue(taskManager.getHistory().isEmpty(), "История должна очищаться от удалённых задач.");
         assertTrue(taskManager.getPrioritizedTasks().isEmpty(), "Приоритетный список должен очищаться.");
     }
@@ -372,8 +377,17 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         assertTrue(taskManager.getEpics().isEmpty(), "Список эпиков должен быть пустым.");
         assertTrue(taskManager.getSubtasks().isEmpty(), "Список подзадач должен быть пустым.");
-        assertNull(taskManager.getEpic(epic.getId()), "Эпик не должен находиться после очистки.");
-        assertNull(taskManager.getSubtask(subtask.getId()), "Подзадача не должна находиться после очистки.");
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getEpic(epic.getId()),
+                "После очистки эпик должен выбрасывать NotFoundException."
+        );
+
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getSubtask(subtask.getId()),
+                "После очистки подзадача должна выбрасывать NotFoundException."
+        );
         assertTrue(taskManager.getHistory().isEmpty(), "История должна очищаться.");
     }
 
@@ -486,9 +500,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldReturnEmptyListForNonExistingEpicSubtasks() {
-        List<Subtask> epicSubtasks = taskManager.getEpicSubtasks(999);
-
-        assertTrue(epicSubtasks.isEmpty(), "Для несуществующего эпика должен возвращаться пустой список.");
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getEpicSubtasks(999),
+                "Для несуществующего эпика должен выбрасываться NotFoundException."
+        );
     }
 
     // Проверка сортировки задач и подзадач в приоритетном списке
@@ -534,7 +550,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.getTask(task.getId());
         taskManager.deleteTask(task.getId());
 
-        assertNull(taskManager.getTask(task.getId()), "Задача должна быть удалена.");
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getTask(task.getId()),
+                "После удаления задача должна выбрасывать NotFoundException."
+        );
         assertTrue(taskManager.getTasks().isEmpty(), "Список задач должен быть пустым.");
         assertTrue(taskManager.getHistory().isEmpty(), "История должна очищаться от удалённой задачи.");
     }
@@ -556,7 +576,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         Epic savedEpic = taskManager.getEpic(epic.getId());
 
-        assertNull(taskManager.getSubtask(subtask.getId()), "Подзадача должна быть удалена.");
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getSubtask(subtask.getId()),
+                "После удаления подзадача должна выбрасывать NotFoundException."
+        );
         assertTrue(savedEpic.getSubtaskIds().isEmpty(), "У эпика не должно остаться подзадач.");
         assertEquals(Status.NEW, savedEpic.getStatus(), "Статус эпика должен пересчитаться.");
         assertNull(savedEpic.getDuration(), "Продолжительность эпика должна стать null.");
@@ -577,26 +601,47 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         taskManager.deleteEpic(epic.getId());
 
-        assertNull(taskManager.getEpic(epic.getId()), "Эпик должен быть удалён.");
-        assertNull(taskManager.getSubtask(subtask.getId()), "Подзадача эпика тоже должна быть удалена.");
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getEpic(epic.getId()),
+                "После удаления эпик должен выбрасывать NotFoundException."
+        );
+
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getSubtask(subtask.getId()),
+                "После удаления эпика его подзадача тоже должна выбрасывать NotFoundException."
+        );
         assertTrue(taskManager.getEpics().isEmpty(), "Список эпиков должен быть пустым.");
         assertTrue(taskManager.getSubtasks().isEmpty(), "Список подзадач должен быть пустым.");
     }
 
     // Проверка граничных случаев поиска задач, эпиков и подзадач
     @Test
-    void shouldReturnNullWhenTaskNotFound() {
-        assertNull(taskManager.getTask(999), "Несуществующая задача должна возвращать null.");
+    void shouldThrowNotFoundExceptionWhenTaskNotFound() {
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getTask(999),
+                "Несуществующая задача должна выбрасывать NotFoundException."
+        );
     }
 
     @Test
-    void shouldReturnNullWhenEpicNotFound() {
-        assertNull(taskManager.getEpic(999), "Несуществующий эпик должен возвращать null.");
+    void shouldThrowNotFoundExceptionWhenEpicNotFound() {
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getEpic(999),
+                "Несуществующий эпик должен выбрасывать NotFoundException."
+        );
     }
 
     @Test
-    void shouldReturnNullWhenSubtaskNotFound() {
-        assertNull(taskManager.getSubtask(999), "Несуществующая подзадача должна возвращать null.");
+    void shouldThrowNotFoundExceptionWhenSubtaskNotFound() {
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.getSubtask(999),
+                "Несуществующая подзадача должна выбрасывать NotFoundException."
+        );
     }
 
     // Проверка добавления задач в историю просмотров
@@ -630,9 +675,12 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 999
         );
 
-        Subtask createdSubtask = taskManager.createSubtask(subtask);
+        assertThrows(
+                NotFoundException.class,
+                () -> taskManager.createSubtask(subtask),
+                "Подзадача без существующего эпика должна выбрасывать NotFoundException."
+        );
 
-        assertNull(createdSubtask, "Подзадача не должна создаваться без существующего эпика.");
         assertTrue(taskManager.getSubtasks().isEmpty(), "Список подзадач должен остаться пустым.");
     }
 
