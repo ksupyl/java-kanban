@@ -66,14 +66,14 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         if ("/tasks".equals(path)) {
             List<Task> tasks = taskManager.getTasks();
             String response = gson.toJson(tasks);
-            sendText(exchange, response, 200);
+            sendText(exchange, response, STATUS_OK);
             return;
         }
 
         int id = extractId(path);
         Task task = taskManager.getTask(id);
         String response = gson.toJson(task);
-        sendText(exchange, response, 200);
+        sendText(exchange, response, STATUS_OK);
     }
 
     // Обработка POST-запроса:
@@ -104,7 +104,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
     private void handleDelete(HttpExchange exchange, String path) throws IOException {
         int id = extractId(path);
         taskManager.deleteTask(id);
-        sendText(exchange, "", 200);
+        sendText(exchange, "", STATUS_OK);
     }
 
     // Извлечение id задачи из пути.

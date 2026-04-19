@@ -68,7 +68,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
         if ("/epics".equals(path)) {
             List<Epic> epics = taskManager.getEpics();
             String response = gson.toJson(epics);
-            sendText(exchange, response, 200);
+            sendText(exchange, response, STATUS_OK);
             return;
         }
 
@@ -76,14 +76,14 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
             int epicId = extractEpicIdForSubtasks(path);
             List<Subtask> subtasks = taskManager.getEpicSubtasks(epicId);
             String response = gson.toJson(subtasks);
-            sendText(exchange, response, 200);
+            sendText(exchange, response, STATUS_OK);
             return;
         }
 
         int id = extractId(path);
         Epic epic = taskManager.getEpic(id);
         String response = gson.toJson(epic);
-        sendText(exchange, response, 200);
+        sendText(exchange, response, STATUS_OK);
     }
 
     // Обработка POST-запроса:
@@ -114,7 +114,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
     private void handleDelete(HttpExchange exchange, String path) throws IOException {
         int id = extractId(path);
         taskManager.deleteEpic(id);
-        sendText(exchange, "", 200);
+        sendText(exchange, "", STATUS_OK);
     }
 
     // Извлечение id эпика из пути вида /epics/{id}.

@@ -66,14 +66,14 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
         if ("/subtasks".equals(path)) {
             List<Subtask> subtasks = taskManager.getSubtasks();
             String response = gson.toJson(subtasks);
-            sendText(exchange, response, 200);
+            sendText(exchange, response, STATUS_OK);
             return;
         }
 
         int id = extractId(path);
         Subtask subtask = taskManager.getSubtask(id);
         String response = gson.toJson(subtask);
-        sendText(exchange, response, 200);
+        sendText(exchange, response, STATUS_OK);
     }
 
     // Обработка POST-запроса:
@@ -104,7 +104,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
     private void handleDelete(HttpExchange exchange, String path) throws IOException {
         int id = extractId(path);
         taskManager.deleteSubtask(id);
-        sendText(exchange, "", 200);
+        sendText(exchange, "", STATUS_OK);
     }
 
     // Извлечение id подзадачи из пути.

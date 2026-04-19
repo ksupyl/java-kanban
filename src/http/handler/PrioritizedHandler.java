@@ -43,7 +43,7 @@ public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
 
             List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
             String response = gson.toJson(prioritizedTasks);
-            sendText(exchange, response, 200);
+            sendText(exchange, response, STATUS_OK);
 
         } catch (Exception e) {
             sendInternalError(exchange);

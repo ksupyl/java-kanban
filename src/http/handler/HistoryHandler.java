@@ -43,7 +43,7 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
 
             List<Task> history = taskManager.getHistory();
             String response = gson.toJson(history);
-            sendText(exchange, response, 200);
+            sendText(exchange, response, STATUS_OK);
 
         } catch (Exception e) {
             sendInternalError(exchange);
